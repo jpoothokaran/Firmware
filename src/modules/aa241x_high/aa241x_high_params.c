@@ -75,6 +75,14 @@ PARAM_DEFINE_FLOAT(AAH_PROPROLLGAIN, 1.0f);
 
 // TODO: define custom parameters here
 
+/**
+ *THROTTLE TRIM
+ *
+ *Default throttle trim will be 0
+ *
+ */
+PARAM_DEFINE_FLOAT(AAH_THROTTLETRIM, 0.0f);
+
 
 int aah_parameters_init(struct aah_param_handles *h)
 {
@@ -90,6 +98,11 @@ int aah_parameters_init(struct aah_param_handles *h)
 	h->proportional_roll_gain 	= param_find("AAH_PROPROLLGAIN");
 
 	// TODO: add the above line for each of your custom parameters........
+	// Trim parameters
+	h->throttle_trim		= param_find("AAH_THROTTLETRIM");
+	
+	// Gain parameters
+	
 
 	return OK;
 }
@@ -103,6 +116,8 @@ int aah_parameters_update(const struct aah_param_handles *h, struct aah_params *
 	param_get(h->proportional_roll_gain, &(p->proportional_roll_gain));
 
 	// TODO: add the above line for each of your custom parameters.....
+	// Trim parameters
+	param_get(h->throttle_trim, &(p->throttle_trim))
 
 	return OK;
 }
