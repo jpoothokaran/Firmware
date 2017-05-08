@@ -42,46 +42,82 @@
 
 #include "aa241x_high_params.h"
 
-
-
 /*
  *  controller parameters, use max. 15 characters for param name!
- *
  */
-
-/**
- * This is an example parameter.  The name of the parameter in QGroundControl
- * will be AAH_EXAMPLE and will be in the AAH dropdown.  Make sure to always
- * start your parameters with AAH to have them all in one place.
- *
- * The default value of this float parameter will be 10.0.
- *
- * @unit meter 						(the unit attribute (not required, just helps for sanity))
- * @group AA241x High Params		(always include this)
- */
-PARAM_DEFINE_FLOAT(AAH_EXAMPLE, 10.0f);
-
-/**
- * This is an example parameter.  The name of the parameter in QGroundControl
- * will be AAH_PROPROLLGAIN and will be in the AAH dropdown.  Make sure to always
- * start your parameters with AAH to have them all in one place.
- *
- * The default value of this float parameter will be 1.0.
- *
- * @unit none 						(the unit attribute (not required, just helps for sanity))
- * @group AA241x High Params		(always include this)
- */
-PARAM_DEFINE_FLOAT(AAH_PROPROLLGAIN, 1.0f);
-
-// TODO: define custom parameters here
 
 /**
  *THROTTLE TRIM
  *
  *Default throttle trim will be 0
  *
+ * @unit thrust? voltage to motor?	(the unit attribute (not required, just helps for sanity))
+ * @group AA241x High Params		(always include this)
  */
-PARAM_DEFINE_FLOAT(AAH_THROTTLETRIM, 0.0f);
+PARAM_DEFINE_FLOAT(AAH_TRIMTHROTTL, 0.0f);
+
+/**
+ *ELEVATOR TRIM
+ *
+ *Default throttle trim will be 0
+ *
+ * @unit radians			(the unit attribute (not required, just helps for sanity))
+ * @group AA241x High Params		(always include this)
+ */
+PARAM_DEFINE_FLOAT(AAH_TRIMELEV, 0.0f);
+
+/**
+ *AILERON TRIM
+ *
+ *Default throttle trim will be 0
+ *
+ * @unit radians			(the unit attribute (not required, just helps for sanity))
+ * @group AA241x High Params		(always include this)
+ */
+PARAM_DEFINE_FLOAT(AAH_TRIMAILERON, 0.0f);
+
+/**
+ *RUDDER TRIM
+ *
+ *Default throttle trim will be 0
+ *
+ * @unit radians			(the unit attribute (not required, just helps for sanity))
+ * @group AA241x High Params		(always include this)
+ */
+PARAM_DEFINE_FLOAT(AAH_TRIMRUDDER, 0.0f);
+
+/**
+ *THROTTLE GAIN
+ *Throttle gain K from our control law. K*(u_c - u_meas)=delta_throttle
+ *
+ *Default throttle trim will be 1
+ *
+ * @unit none				(the unit attribute (not required, just helps for sanity))
+ * @group AA241x High Params		(always include this)
+ */
+PARAM_DEFINE_FLOAT(AAH_GAINTHROTTL, 1.0f);
+
+/**
+ *ALTITUDE GAIN
+ *Altitude to pitch gain K from our control law. K*(h_c - h_meas)=theta_command
+ *
+ *Default throttle trim will be 1
+ *
+ * @unit none				(the unit attribute (not required, just helps for sanity))
+ * @group AA241x High Params		(always include this)
+ */
+PARAM_DEFINE_FLOAT(AAH_GAINALT, 1.0f);
+
+/**
+ *PITCH GAIN
+ *Pitch to elevator gain K from our control law. K*(theta_c - theta_meas)=delta_elevator
+ *
+ *Default throttle trim will be 1
+ *
+ * @unit none				(the unit attribute (not required, just helps for sanity))
+ * @group AA241x High Params		(always include this)
+ */
+PARAM_DEFINE_FLOAT(AAH_GAINPITCH, 1.0f);
 
 
 int aah_parameters_init(struct aah_param_handles *h)
@@ -94,14 +130,19 @@ int aah_parameters_init(struct aah_param_handles *h)
 	 * NOTE: the string passed to param_find is the same as the name provided
 	 * in the above PARAM_DEFINE_FLOAT
 	 */
-	h->example_high_param		= param_find("AAH_EXAMPLE");
-	h->proportional_roll_gain 	= param_find("AAH_PROPROLLGAIN");
 
-	// TODO: add the above line for each of your custom parameters........
 	// Trim parameters
-	h->throttle_trim		= param_find("AAH_THROTTLETRIM");
+	h->trim_throttle		= param_find("AAH_TRIMTHROTTL");
+	h->trim_elevator		= param_find("AAH_TRIMELEV");
+	h->trim_aileron			= param_find("AAH_TRIMAILERON");
+	h->trim_rudder			= param_find("AAH_TRIMRUDDER");
 	
-	// Gain parameters
+	// Longitudinal Gain parameters
+	h->gain_throttle		= param_find("AAH_GAINTHROTTL");
+	h->gain_altitude		= param_find("AAH_GAINALT");
+	h->gain_pitch			= param_find("AAH_GAINPITCH");
+	
+	// Lateral Gain parameters
 	
 
 	return OK;
@@ -112,12 +153,20 @@ int aah_parameters_update(const struct aah_param_handles *h, struct aah_params *
 
 	// for each of your custom parameters, make sure to add this line with
 	// the corresponding variable name
-	param_get(h->example_high_param, &(p->example_high_param));
-	param_get(h->proportional_roll_gain, &(p->proportional_roll_gain));
 
-	// TODO: add the above line for each of your custom parameters.....
 	// Trim parameters
-	param_get(h->throttle_trim, &(p->throttle_trim))
+	param_get(h->trim_throttle, &(p->trim_throttle))
+	param_get(h->trim_elevator, &(p->trim_elevator))
+	param_get(h->trim_aileron, &(p->trim_aileron))
+	param_get(h->trim_rudder, &(p->trim_rudder))
+		
+	// Longitudinal Gain Parameters
+	param_get(h->gain_throttle, &(p->gain_throttle))
+	param_get(h->gain_altitude, &(p->gain_altitude))
+	param_get(h->gain_pitch, &(p->gain_pitch))
+	
+	// Lateral Gain Parameters
+	
 
 	return OK;
 }
