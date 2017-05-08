@@ -52,7 +52,7 @@ using namespace aa241x_high;
 
 // define global variables (can be seen by all files in aa241x_high directory unless static keyword used)
 float altitude_desired = 0.0f;
-
+float speed_body_u_desired = 0.0f;
 /**
  * Main function in which your code should be written.
  *
@@ -69,7 +69,7 @@ void flight_control() {
 	if (hrt_absolute_time() - previous_loop_timestamp > 500000.0f) { // Run if more than 0.5 seconds have passes since last loop, 
 																	 //	should only occur on first engagement since this is 59Hz loop
 		yaw_desired = yaw; 							// yaw_desired already defined in aa241x_high_aux.h
-		altitude_desired = position_D_baro; 		// altitude_desired needs to be declared outside flight_control() function
+		altitude_desired = position_D_baro; 		// altitude_desired needs to be declared outside flight_control() function	
 	}
 
 
@@ -110,4 +110,36 @@ void flight_control() {
 	pitch_servo_out = -man_pitch_in;
 	yaw_servo_out = man_yaw_in;
 	throttle_servo_out = man_throttle_in;
+	
+	//Start of our own code. Code above this is roll stabilizer example
+	if (hrt_absolute_time() - previous_loop_timestamp > 500000.0f) { // Run if more than 0.5 seconds have passes since last loop, 
+		
+		throttle_desired = man_throttle_in; 		//throttle is manually input
+		altitude_desired = position_D_baro; 		//position_D_baro is current position read by the firmware
+	}
+	
+	float proportionalThrottleCorrection = aah_parameters.proportional_throttle_gain*(speed_body_u_desired - speed_body_u);
+	
+	float proportionalPitchCorrection = aah_parameters.proportional_altitude_gain*(altitude_desired - position_D_baro);
+	
+	float proportionalElevatorCorrection = aah_parameters.proportional_pitch_gain*(proportionalPitchCorrection - pitch);
+	
+	float elevatorOutput = -(pitch_trim + proportionalElevatorCorrection);	//negative to invert servo output
+	float throttleOutput = man_throttle_in + proportionalThrottleCorrection;
+	
+	// Do bounds checking to keep the elevator output within the -1..1 limits of the servo output
+	if (elevatorOutput > 1.0f) {
+		elevatorOutput = 1.0f;
+	} else if (elevatorOutput < -1.0f ) {
+		elevatorOutput = -1.0f;
+	}
+	if (throttleOutput > 1.0f) {
+		throttleOutput = 1.0f;
+	} else if (throttleOutput < 0.0f ) {
+		throttleOutput = 0.0f;
+	}
+	
+	pitch_servo_out = elevatorOutput;
+	throttle_servo_out = throttleOutput;
+	
 }
