@@ -64,6 +64,8 @@ struct aah_params {
 	float proportional_roll_gain;
 
 	// TODO: add custom parameter variable names here......
+	// Trims
+	float throttle_trim;
 
 };
 
@@ -83,6 +85,8 @@ struct aah_param_handles {
 	param_t proportional_roll_gain;
 
 	// TODO: add custom parameter variable names here.......
+	// Trims
+	param_t throttle_trim;
 
 };
 
