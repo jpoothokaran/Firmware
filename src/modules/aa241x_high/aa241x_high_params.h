@@ -60,12 +60,16 @@ extern "C" {
  */
 struct aah_params {
 
-	float example_high_param;
-	float proportional_roll_gain;
-
-	// TODO: add custom parameter variable names here......
 	// Trims
-	float throttle_trim;
+	float trim_throttle;
+	float trim_elevator;
+	float trim_aileron;
+	float trim_rudder;
+	
+	// Longitudinal Gains
+	float gain_throttle;
+	float gain_altitude;
+	float gain_pitch;
 
 };
 
@@ -81,12 +85,16 @@ struct aah_params {
  */
 struct aah_param_handles {
 
-	param_t example_high_param;
-	param_t proportional_roll_gain;
-
-	// TODO: add custom parameter variable names here.......
 	// Trims
-	param_t throttle_trim;
+	param_t trim_throttle;
+	param_t trim_elevator;
+	param_t trim_aileron;
+	param_t trim_rudder;
+	
+	// Longitudinal Gains
+	param_t gain_throttle;
+	param_t gain_altitude;
+	param_t gain_pitch;
 
 };
 
