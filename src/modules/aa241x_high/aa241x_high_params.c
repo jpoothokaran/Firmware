@@ -59,7 +59,7 @@ PARAM_DEFINE_FLOAT(AAH_TRIMTHROTTL, 0.0f);
 /**
  *ELEVATOR TRIM
  *
- *Default throttle trim will be 0
+ *Default elevator trim will be 0
  *
  * @unit radians			(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
@@ -69,7 +69,7 @@ PARAM_DEFINE_FLOAT(AAH_TRIMELEV, 0.0f);
 /**
  *AILERON TRIM
  *
- *Default throttle trim will be 0
+ *Default aileron trim will be 0
  *
  * @unit radians			(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
@@ -79,7 +79,7 @@ PARAM_DEFINE_FLOAT(AAH_TRIMAILERON, 0.0f);
 /**
  *RUDDER TRIM
  *
- *Default throttle trim will be 0
+ *Default rudder trim will be 0
  *
  * @unit radians			(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
@@ -90,7 +90,7 @@ PARAM_DEFINE_FLOAT(AAH_TRIMRUDDER, 0.0f);
  *THROTTLE GAIN
  *Throttle gain K from our control law. K*(u_c - u_meas)=delta_throttle
  *
- *Default throttle trim will be 1
+ *Default throttle gain will be 1
  *
  * @unit none				(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
@@ -101,7 +101,7 @@ PARAM_DEFINE_FLOAT(AAH_GAINTHROTTL, 1.0f);
  *ALTITUDE GAIN
  *Altitude to pitch gain K from our control law. K*(h_c - h_meas)=theta_command
  *
- *Default throttle trim will be 1
+ *Default altitude gain will be 1
  *
  * @unit none				(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
@@ -112,12 +112,67 @@ PARAM_DEFINE_FLOAT(AAH_GAINALT, 1.0f);
  *PITCH GAIN
  *Pitch to elevator gain K from our control law. K*(theta_c - theta_meas)=delta_elevator
  *
- *Default throttle trim will be 1
+ *Default pitch gain will be 1
  *
  * @unit none				(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
 PARAM_DEFINE_FLOAT(AAH_GAINPITCH, 1.0f);
+
+/**
+ *YAW RATE GAIN
+ *r to deltarcommand feedback gain K from our control law. K*r=r_washout that feeds into deltarcommand summing junction
+ *
+ *Default yaw rate (r) gain will be 1
+ *
+ * @unit none				(the unit attribute (not required, just helps for sanity))
+ * @group AA241x High Params		(always include this)
+ */
+PARAM_DEFINE_FLOAT(AAH_GAINYAWRATE, 1.0f);
+
+/**
+ *BETA GAIN
+ *beta to deltarbeta gain K from our control law. K*(beta_c-beta)=deltarbeta that feeds into deltarcommand summing junction
+ *
+ *Default beta gain will be 1
+ *
+ * @unit none				(the unit attribute (not required, just helps for sanity))
+ * @group AA241x High Params		(always include this)
+ */
+PARAM_DEFINE_FLOAT(AAH_GAINBETA, 1.0f);
+
+/**
+ *ROLL GAIN
+ *roll to deltaaileron gain K from our control law. K*(roll_c-roll)=deltaaileron that closes roll loop
+ *
+ *Default roll gain will be 1
+ *
+ * @unit none				(the unit attribute (not required, just helps for sanity))
+ * @group AA241x High Params		(always include this)
+ */
+PARAM_DEFINE_FLOAT(AAH_GAINPHI, 1.0f);
+
+/**
+ *HEADING GAIN
+ *psi to phicommand gain K from our control law. K*(heading_c-heading)=roll_c that closes heading loop
+ *
+ *Default heading gain will be 1
+ *
+ * @unit none				(the unit attribute (not required, just helps for sanity))
+ * @group AA241x High Params		(always include this)
+ */
+PARAM_DEFINE_FLOAT(AAH_GAINPSI, 1.0f);
+
+/**
+ *TRACKING GAIN
+ *y to phi gain K from our control law. K*(y_c-y)=phi_c that closes tracking loop
+ *
+ *Default tracking gain will be 1
+ *
+ * @unit none				(the unit attribute (not required, just helps for sanity))
+ * @group AA241x High Params		(always include this)
+ */
+PARAM_DEFINE_FLOAT(AAH_GAINTRACK, 1.0f);
 
 
 int aah_parameters_init(struct aah_param_handles *h)
@@ -143,7 +198,11 @@ int aah_parameters_init(struct aah_param_handles *h)
 	h->gain_pitch			= param_find("AAH_GAINPITCH");
 	
 	// Lateral Gain parameters
-	
+	h->gain_yawrate			= param_find("AAH_GAINYAWRATE");
+	h->gain_beta			= param_find("AAH_GAINBETA");
+	h->gain_phi			= param_find("AAH_GAINPHI");
+	h->gain_psi			= param_find("AAH_GAINPSI");
+	h->gain_tracking		= param_find("AAH_GAINTRACK");
 
 	return OK;
 }
@@ -166,7 +225,11 @@ int aah_parameters_update(const struct aah_param_handles *h, struct aah_params *
 	param_get(h->gain_pitch, &(p->gain_pitch))
 	
 	// Lateral Gain Parameters
-	
+	param_get(h->gain_yawrate, &(p->gain_yawrate))
+	param_get(h->gain_beta, &(p->gain_beta))
+	param_get(h->gain_phi, &(p->gain_phi))
+	param_get(h->gain_psi, &(p->gain_psi))
+	param_get(h->gain_tracking, &(p->gain_tracking))
 
 	return OK;
 }
