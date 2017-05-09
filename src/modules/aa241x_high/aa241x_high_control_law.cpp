@@ -60,6 +60,7 @@ float speed_body_u_desired = 0.0f;
  * feel free to add all the function you'd like, but make sure all
  * the code you'd like executed on a loop is in this function.
  */
+
 void flight_control() {
 
 	float my_float_variable = 0.0f;		/**< example float variable */
@@ -87,17 +88,31 @@ void flight_control() {
 	//
 	
 	roll_desired = 0.0f; // roll_desired already exists in aa241x_high_aux so no need to repeat float declaration
-
+	if(stabilized_roll) //this could be a boolean set globally. stabilized means limited flight envelope
+	{
+		roll_desired = man_roll_in; // radians
+		
+		float maxBankAngle = 30.0f; //degrees
+		if(roll_desired > maxBankAngle*0.0174533.f). 
+		{
+			roll_desired = maxBankAngle*0.0174533.f;
+		}
+		else if(roll_desired < maxBankAngle*-0.0174533.f). 
+		{
+			roll_desired = -maxBankAngle*0.0174533.f;
+		}
+		
 	// Now use your parameter gain and multiply by the error from desired
-	float proportionalRollCorrection = aah_parameters.proportional_roll_gain * (roll - roll_desired);
+		float proportionalRollCorrection = aah_parameters.proportional_roll_gain * (roll_desired-roll);
 
-	// Note the use of x.0f, this is important to specify that these are single and not double float values!
+		// Note the use of x.0f, this is important to specify that these are single and not double float values!
 
-	// Do bounds checking to keep the roll correction within the -1..1 limits of the servo output
-	if (proportionalRollCorrection > 1.0f) {
-		proportionalRollCorrection = 1.0f;
-	} else if (proportionalRollCorrection < -1.0f ) {
-		proportionalRollCorrection = -1.0f;
+		// Do bounds checking to keep the roll correction within the -1..1 limits of the servo output
+		if (proportionalRollCorrection > 1.0f) {
+			proportionalRollCorrection = 1.0f;
+		} else if (proportionalRollCorrection < -1.0f ) {
+			proportionalRollCorrection = -1.0f;
+		}
 	}
 
 	// ENSURE THAT YOU SET THE SERVO OUTPUTS!!!
@@ -127,6 +142,10 @@ void flight_control() {
 	float elevatorOutput = -(pitch_trim + proportionalElevatorCorrection);	//negative to invert servo output
 	float throttleOutput = man_throttle_in + proportionalThrottleCorrection;
 	
+	
+	
+	
+	
 	// Do bounds checking to keep the elevator output within the -1..1 limits of the servo output
 	if (elevatorOutput > 1.0f) {
 		elevatorOutput = 1.0f;
@@ -138,6 +157,7 @@ void flight_control() {
 	} else if (throttleOutput < 0.0f ) {
 		throttleOutput = 0.0f;
 	}
+	
 	
 	pitch_servo_out = elevatorOutput;
 	throttle_servo_out = throttleOutput;
