@@ -70,6 +70,13 @@ struct aah_params {
 	float gain_throttle;
 	float gain_altitude;
 	float gain_pitch;
+	
+	// Lateral Gains
+	float gain_yawrate;
+	float gain_beta;
+	float gain_phi;
+	float gain_psi;
+	float gain_tracking;
 
 };
 
@@ -95,6 +102,13 @@ struct aah_param_handles {
 	param_t gain_throttle;
 	param_t gain_altitude;
 	param_t gain_pitch;
+	
+	// Lateral Gains
+	param_t gain_yawrate;
+	param_t gain_beta;
+	param_t gain_phi;
+	param_t gain_psi;
+	param_t gain_tracking;
 
 };
 
