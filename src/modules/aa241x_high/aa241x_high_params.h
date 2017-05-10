@@ -32,143 +32,109 @@
  ****************************************************************************/
 
 /*
- * @file aa241x_fw_control.cpp
+ * @file aa241x_fw_control_params.h
  *
- * Secondary file to the fixedwing controller containing the
- * control law for the AA241x class.
+ * Definition of custom parameters for fixedwing controllers
+ * being written for AA241x.
  *
  *  @author Adrien Perkins		<adrienp@stanford.edu>
- *  @author YOUR NAME			<YOU@EMAIL.COM>
  */
+#pragma once
 
-#include <uORB/uORB.h>
+#ifndef AA241X_FW_CONTROL_PARAMS_H_
+#define AA241X_FW_CONTROL_PARAMS_H_
 
-// include header file
-#include "aa241x_high_control_law.h"
-#include "aa241x_high_aux.h"
 
-// needed for variable names
-using namespace aa241x_high;
+#include <systemlib/param/param.h>
 
-// define global variables (can be seen by all files in aa241x_high directory unless static keyword used)
-float altitude_desired = 0.0f;
-float speed_body_u_desired = 0.0f;
-/**
- * Main function in which your code should be written.
- *
- * This is the only function that is executed at a set interval,
- * feel free to add all the function you'd like, but make sure all
- * the code you'd like executed on a loop is in this function.
- */
-
-void flight_control() {
-    
-    float my_float_variable = 0.0f;		/**< example float variable */
+#ifdef __cplusplus
+extern "C" {
+#endif
     
     
-    // An example of how to run a one time 'setup' for example to lock one's altitude and heading...
-    if (hrt_absolute_time() - previous_loop_timestamp > 500000.0f) { // Run if more than 0.5 seconds have passes since last loop,
-        //	should only occur on first engagement since this is 59Hz loop
-        yaw_desired = yaw; 							// yaw_desired already defined in aa241x_high_aux.h
-        altitude_desired = position_D_baro; 		// altitude_desired needs to be declared outside flight_control() function
-    }
-    
-    
-    // TODO: write all of your flight control here...
-    
-    
-    // getting low data value example
-    // float my_low_data = low_data.field1;
-    
-    // setting high data value example
-    high_data.field1 = my_float_variable;
-    
-    
-    // // Make a really simple proportional roll stabilizer // //
-    //
-    
-    roll_desired = 0.0f; // roll_desired already exists in aa241x_high_aux so no need to repeat float declaration
-    if(1)//stabilized_roll) //this could be a boolean set globally. stabilized means limited flight envelope
-    {
-        roll_desired = man_roll_in; // radians
+    /**
+     * Struct of all of the custom parameters.
+     *
+     * Please make sure to add a variable for each of your newly defined
+     * parameters here.
+     */
+    struct aah_params {
         
-        float maxBankAngle = 30.0f; //degrees
-        if(roll_desired > maxBankAngle*0.01745f)
-        {
-            roll_desired = maxBankAngle*0.01745f;
-        }
-        else if(roll_desired < maxBankAngle*-0.01745f)
-        {
-            roll_desired = -maxBankAngle*0.01745f;
-        }
-        //roll_desired = -maxBankAngle*0.01745f;
-    }
-    float proportionalRollCorrection = aah_parameters.proportional_roll_gain * (roll_desired-roll);
-    
-        // Now use your parameter gain and multiply by the error from desired
+        // Trims
+        float trim_throttle;
+        float trim_elevator;
+        float trim_aileron;
+        float trim_rudder;
         
+        // Longitudinal Gains
+        float gain_throttle;
+        float gain_altitude;
+        float gain_pitch;
         
-        // Note the use of x.0f, this is important to specify that these are single and not double float values!
+        // Lateral Gains
+        float gain_yawrate;
+        float gain_beta;
+        float gain_phi;
+        float gain_psi;
+        float gain_tracking;
         
-        // Do bounds checking to keep the roll correction within the -1..1 limits of the servo output
-        if (proportionalRollCorrection > 1.0f) {
-            proportionalRollCorrection = 1.0f;
-        } else if (proportionalRollCorrection < -1.0f ) {
-            proportionalRollCorrection = -1.0f;
-        }
-    
-    
-    // ENSURE THAT YOU SET THE SERVO OUTPUTS!!!
-    // outputs should be set to values between -1..1 (except throttle is 0..1)
-    // where zero is no actuation, and -1,1 are full throw in either the + or - directions
-    
-    // Set output of roll servo to the control law output calculated above
-    roll_servo_out = proportionalRollCorrection;
-//    pitch_servo_out = -man_pitch_in;
-//    yaw_servo_out = man_yaw_in;
-//    throttle_servo_out = man_throttle_in;
-    
-    
-    //Start of our own code. Code above this is roll stabilizer example
-    if (hrt_absolute_time() - previous_loop_timestamp > 500000.0f) { // Run if more than 0.5 seconds have passes since last loop,
+        //roll gain
+        float proportional_roll_gain;
         
-        throttle_desired = man_throttle_in; 		//throttle is manually input
-        altitude_desired = position_D_baro; 		//position_D_baro is current position read by the firmware
-    }
-    
-    float proportionalThrottleCorrection = aah_parameters.gain_throttle*(speed_body_u_desired - speed_body_u);
-    
-    float proportionalPitchCorrection = aah_parameters.gain_altitude*(altitude_desired - position_D_baro);
-    
-    float proportionalElevatorCorrection = aah_parameters.gain_pitch*(proportionalPitchCorrection - pitch);
-    
-    float elevatorOutput = -(pitch_trim + proportionalElevatorCorrection);	//negative to invert servo output
-    float throttleOutput = man_throttle_in + proportionalThrottleCorrection;
+    };
     
     
+    /**
+     * Struct of handles to all of the custom parameters.
+     *
+     *  Please make sure to add a variable for each of your newly
+     *  defined parameters here.
+     *
+     *  NOTE: these variable names can be the same as the ones above
+     *  (makes life easier if they are)
+     */
+    struct aah_param_handles {
+        
+        // Trims
+        param_t trim_throttle;
+        param_t trim_elevator;
+        param_t trim_aileron;
+        param_t trim_rudder;
+        
+        // Longitudinal Gains
+        param_t gain_throttle;
+        param_t gain_altitude;
+        param_t gain_pitch;
+        
+        // Lateral Gains
+        param_t gain_yawrate;
+        param_t gain_beta;
+        param_t gain_phi;
+        param_t gain_psi;
+        param_t gain_tracking;
+        
+        //rol gain
+        param_t proportional_roll_gain;
+        
+    };
     
+    /**
+     * Initialize all parameter handles and values
+     *
+     */
+    int aah_parameters_init(struct aah_param_handles *h);
     
+    /**
+     * Update all parameters
+     *
+     */
+    int aah_parameters_update(const struct aah_param_handles *h, struct aah_params *p);
     
-    // Do bounds checking to keep the elevator output within the -1..1 limits of the servo output
-    if (elevatorOutput > 1.0f) {
-        elevatorOutput = 1.0f;
-    } else if (elevatorOutput < -1.0f ) {
-        elevatorOutput = -1.0f;
-    }
-    if (throttleOutput > 1.0f) {
-        throttleOutput = 1.0f;
-    } else if (throttleOutput < 0.0f ) {
-        throttleOutput = 0.0f;
-    }
-    
-    
-    //pitch_servo_out = elevatorOutput;
-    //throttle_servo_out = throttleOutput;
-    
-    //roll_servo_out = -1.0f;
-    // as an example, just passing through manual control to everything but roll
-    pitch_servo_out = 1.0f;
-    yaw_servo_out = -1.0f;
-    throttle_servo_out = man_throttle_in;
-    
+#ifdef __cplusplus
 }
+#endif
+
+
+
+
+#endif /* AA241X_FW_CONTROL_PARAMS_H_ */
