@@ -51,8 +51,7 @@
 using namespace aa241x_high;
 
 // define global variables (can be seen by all files in aa241x_high directory unless static keyword used)
-float altitude_desired = 0.0f;
-float speed_body_u_desired = 0.0f;
+
 /**
  * Main function in which your code should be written.
  *
@@ -87,7 +86,7 @@ void flight_control() {
     // // Make a really simple proportional roll stabilizer // //
     //
     
-    roll_desired = 0.0f; // roll_desired already exists in aa241x_high_aux so no need to repeat float declaration
+    roll_desired = aah_parameters.cmd_phi; // roll_desired already exists in aa241x_high_aux so no need to repeat float declaration
     if(1)//stabilized_roll) //this could be a boolean set globally. stabilized means limited flight envelope
     {
         roll_desired = man_roll_in; // radians
@@ -104,7 +103,7 @@ void flight_control() {
         //roll_desired = -maxBankAngle*0.01745f;
     }
     float proportionalRollCorrection = aah_parameters.proportional_roll_gain * (roll_desired-roll);
-    
+    // THE ABOVE LINE MAY WANT TO UPDATE PROPORTIONAL ROLL GAIN TO GAIN_PHI
         // Now use your parameter gain and multiply by the error from desired
         
         
@@ -136,9 +135,9 @@ void flight_control() {
         altitude_desired = position_D_baro; 		//position_D_baro is current position read by the firmware
     }
     
-    float proportionalThrottleCorrection = aah_parameters.gain_throttle*(speed_body_u_desired - speed_body_u);
+    float proportionalThrottleCorrection = aah_parameters.gain_throttle*(aah_parameters.cmd_u - speed_body_u);
     
-    float proportionalPitchCorrection = aah_parameters.gain_altitude*(altitude_desired - position_D_baro);
+    float proportionalPitchCorrection = aah_parameters.gain_altitude*(aah_parameters.cmd_alt - position_D_baro);
     
     float proportionalElevatorCorrection = aah_parameters.gain_pitch*(proportionalPitchCorrection - pitch);
     
