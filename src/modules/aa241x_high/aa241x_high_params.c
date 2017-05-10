@@ -95,7 +95,7 @@ PARAM_DEFINE_FLOAT(AAH_TRIMRUDDER, 0.0f);
  * @unit none				(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
-PARAM_DEFINE_FLOAT(AAH_GAINTHROTTL, 1.0f);
+PARAM_DEFINE_FLOAT(AAH_GAINTHROTTL, 5563.0f);
 
 /**
  *ALTITUDE GAIN
@@ -106,7 +106,7 @@ PARAM_DEFINE_FLOAT(AAH_GAINTHROTTL, 1.0f);
  * @unit none				(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
-PARAM_DEFINE_FLOAT(AAH_GAINALT, 1.0f);
+PARAM_DEFINE_FLOAT(AAH_GAINALT, 0.2f);
 
 /**
  *PITCH GAIN
@@ -117,7 +117,7 @@ PARAM_DEFINE_FLOAT(AAH_GAINALT, 1.0f);
  * @unit none				(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
-PARAM_DEFINE_FLOAT(AAH_GAINPITCH, 1.0f);
+PARAM_DEFINE_FLOAT(AAH_GAINPITCH, -110.8f);
 
 /**
  *YAW RATE GAIN
@@ -128,7 +128,7 @@ PARAM_DEFINE_FLOAT(AAH_GAINPITCH, 1.0f);
  * @unit none				(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
-PARAM_DEFINE_FLOAT(AAH_GAINYAWRATE, 1.0f);
+PARAM_DEFINE_FLOAT(AAH_GAINYAWRATE, 50.5f);
 
 /**
  *BETA GAIN
@@ -139,7 +139,7 @@ PARAM_DEFINE_FLOAT(AAH_GAINYAWRATE, 1.0f);
  * @unit none				(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
-PARAM_DEFINE_FLOAT(AAH_GAINBETA, 1.0f);
+PARAM_DEFINE_FLOAT(AAH_GAINBETA, 60.0f);
 
 /**
  *ROLL GAIN
@@ -150,7 +150,7 @@ PARAM_DEFINE_FLOAT(AAH_GAINBETA, 1.0f);
  * @unit none				(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
-PARAM_DEFINE_FLOAT(AAH_GAINPHI, 1.0f);
+PARAM_DEFINE_FLOAT(AAH_GAINPHI, 0.04f);
 
 /**
  *HEADING GAIN
@@ -161,7 +161,7 @@ PARAM_DEFINE_FLOAT(AAH_GAINPHI, 1.0f);
  * @unit none				(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
-PARAM_DEFINE_FLOAT(AAH_GAINPSI, 1.0f);
+PARAM_DEFINE_FLOAT(AAH_GAINPSI, 4500f);
 
 /**
  *TRACKING GAIN
@@ -173,63 +173,72 @@ PARAM_DEFINE_FLOAT(AAH_GAINPSI, 1.0f);
  * @group AA241x High Params		(always include this)
  */
 PARAM_DEFINE_FLOAT(AAH_GAINTRACK, 1.0f);
+//rollgain
+PARAM_DEFINE_FLOAT(AAH_PROPROLLGAIN, -1.0f);
 
 
 int aah_parameters_init(struct aah_param_handles *h)
 {
-
-	/* for each of your custom parameters, make sure to define a corresponding
-	 * variable in the aa_param_handles struct and the aa_params struct these
-	 * structs can be found in the aa241x_fw_control_params.h file
-	 *
-	 * NOTE: the string passed to param_find is the same as the name provided
-	 * in the above PARAM_DEFINE_FLOAT
-	 */
-
-	// Trim parameters
-	h->trim_throttle		= param_find("AAH_TRIMTHROTTL");
-	h->trim_elevator		= param_find("AAH_TRIMELEV");
-	h->trim_aileron			= param_find("AAH_TRIMAILERON");
-	h->trim_rudder			= param_find("AAH_TRIMRUDDER");
-	
-	// Longitudinal Gain parameters
-	h->gain_throttle		= param_find("AAH_GAINTHROTTL");
-	h->gain_altitude		= param_find("AAH_GAINALT");
-	h->gain_pitch			= param_find("AAH_GAINPITCH");
-	
-	// Lateral Gain parameters
-	h->gain_yawrate			= param_find("AAH_GAINYAWRATE");
-	h->gain_beta			= param_find("AAH_GAINBETA");
-	h->gain_phi			= param_find("AAH_GAINPHI");
-	h->gain_psi			= param_find("AAH_GAINPSI");
-	h->gain_tracking		= param_find("AAH_GAINTRACK");
-
-	return OK;
+    
+    /* for each of your custom parameters, make sure to define a corresponding
+     * variable in the aa_param_handles struct and the aa_params struct these
+     * structs can be found in the aa241x_fw_control_params.h file
+     *
+     * NOTE: the string passed to param_find is the same as the name provided
+     * in the above PARAM_DEFINE_FLOAT
+     */
+    
+    // Trim parameters
+    h->trim_throttle		= param_find("AAH_TRIMTHROTTL");
+    h->trim_elevator		= param_find("AAH_TRIMELEV");
+    h->trim_aileron			= param_find("AAH_TRIMAILERON");
+    h->trim_rudder			= param_find("AAH_TRIMRUDDER");
+    
+    // Longitudinal Gain parameters
+    h->gain_throttle		= param_find("AAH_GAINTHROTTL");
+    h->gain_altitude		= param_find("AAH_GAINALT");
+    h->gain_pitch			= param_find("AAH_GAINPITCH");
+    
+    // Lateral Gain parameters
+    h->gain_yawrate			= param_find("AAH_GAINYAWRATE");
+    h->gain_beta			= param_find("AAH_GAINBETA");
+    h->gain_phi			= param_find("AAH_GAINPHI");
+    h->gain_psi			= param_find("AAH_GAINPSI");
+    h->gain_tracking		= param_find("AAH_GAINTRACK");
+    
+    
+    //roll gain
+    h->proportional_roll_gain 	= param_find("AAH_PROPROLLGAIN");
+    
+    return OK;
 }
 
 int aah_parameters_update(const struct aah_param_handles *h, struct aah_params *p)
 {
-
-	// for each of your custom parameters, make sure to add this line with
-	// the corresponding variable name
-
-	// Trim parameters
-	param_get(h->trim_throttle, &(p->trim_throttle))
-	param_get(h->trim_elevator, &(p->trim_elevator))
-	param_get(h->trim_aileron, &(p->trim_aileron))
-	param_get(h->trim_rudder, &(p->trim_rudder))
-		
-	// Longitudinal Gain Parameters
-	param_get(h->gain_throttle, &(p->gain_throttle))
-	param_get(h->gain_altitude, &(p->gain_altitude))
-	param_get(h->gain_pitch, &(p->gain_pitch))
-	
-	// Lateral Gain Parameters
-	param_get(h->gain_yawrate, &(p->gain_yawrate))
-	param_get(h->gain_beta, &(p->gain_beta))
-	param_get(h->gain_phi, &(p->gain_phi))
-	param_get(h->gain_psi, &(p->gain_psi))
-	param_get(h->gain_tracking, &(p->gain_tracking))
-
-	return OK;
+    
+    // for each of your custom parameters, make sure to add this line with
+    // the corresponding variable name
+    
+    // Trim parameters
+    param_get(h->trim_throttle, &(p->trim_throttle));
+    param_get(h->trim_elevator, &(p->trim_elevator));
+    param_get(h->trim_aileron, &(p->trim_aileron));
+    param_get(h->trim_rudder, &(p->trim_rudder));
+    
+    // Longitudinal Gain Parameters
+    param_get(h->gain_throttle, &(p->gain_throttle));
+    param_get(h->gain_altitude, &(p->gain_altitude));
+    param_get(h->gain_pitch, &(p->gain_pitch));
+    
+    // Lateral Gain Parameters
+    param_get(h->gain_yawrate, &(p->gain_yawrate));
+    param_get(h->gain_beta, &(p->gain_beta));
+    param_get(h->gain_phi, &(p->gain_phi));
+    param_get(h->gain_psi, &(p->gain_psi));
+    param_get(h->gain_tracking, &(p->gain_tracking));
+    
+    //roll gain....
+    param_get(h->proportional_roll_gain, &(p->proportional_roll_gain));
+    
+    return OK;
 }
