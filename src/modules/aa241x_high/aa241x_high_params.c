@@ -161,7 +161,7 @@ PARAM_DEFINE_FLOAT(AAH_GAINPHI, 0.04f);
  * @unit none				(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
-PARAM_DEFINE_FLOAT(AAH_GAINPSI, 4500f);
+PARAM_DEFINE_FLOAT(AAH_GAINPSI, 4500.0f);
 
 /**
  *TRACKING GAIN
@@ -173,6 +173,74 @@ PARAM_DEFINE_FLOAT(AAH_GAINPSI, 4500f);
  * @group AA241x High Params		(always include this)
  */
 PARAM_DEFINE_FLOAT(AAH_GAINTRACK, 1.0f);
+
+/**
+ *Velocity command U
+ *For steady level flight
+ *
+ *Default speed will be 14.17 m/s
+ *
+ * @unit meters/second				(the unit attribute (not required, just helps for sanity))
+ * @group AA241x High Params		(always include this)
+ */
+PARAM_DEFINE_FLOAT(AAH_CMDU, 14.17f);
+
+/**
+ *Altitude command
+ *for steady level flight, do not exceed 400m
+ *
+ *Default altitude will be 50m
+ *
+ * @unit meter  				(the unit attribute (not required, just helps for sanity))
+ * @group AA241x High Params		(always include this)
+ */
+PARAM_DEFINE_FLOAT(AAH_CMDALT, 50.0f);
+
+/**
+ *Sideslip beta command
+ *for lateral control
+ *
+ *Default sideslip will be zero
+ *
+ * @unit radians				(the unit attribute (not required, just helps for sanity))
+ * @group AA241x High Params		(always include this)
+ */
+PARAM_DEFINE_FLOAT(AAH_CMDBETA, 0.0f);
+
+/**
+ *PHI, Roll command
+ *for lateral control
+ *
+ *Default roll command will be 0
+ *
+ * @unit radians				(the unit attribute (not required, just helps for sanity))
+ * @group AA241x High Params		(always include this)
+ */
+PARAM_DEFINE_FLOAT(AAH_CMDPHI, 0.0f);
+
+/**
+ *PSI, heading command
+ *Heading command for lateral control
+ *
+ *Default heading will be 0 (north? or initial orientation?)
+ *
+ * @unit radians				(the unit attribute (not required, just helps for sanity))
+ * @group AA241x High Params		(always include this)
+ */
+PARAM_DEFINE_FLOAT(AAH_CMDPSI, 0.0f);
+
+/**
+ *Tracking command
+ *For lateral control to follow a certain trajectory
+ *
+ *Default tracking command will be zero
+ *
+ * @unit none				(the unit attribute (not required, just helps for sanity))
+ * @group AA241x High Params		(always include this)
+ */
+PARAM_DEFINE_FLOAT(AAH_CMDTRACKING, 0.0f);
+
+
 //rollgain
 PARAM_DEFINE_FLOAT(AAH_PROPROLLGAIN, -1.0f);
 
@@ -193,6 +261,14 @@ int aah_parameters_init(struct aah_param_handles *h)
     h->trim_elevator		= param_find("AAH_TRIMELEV");
     h->trim_aileron			= param_find("AAH_TRIMAILERON");
     h->trim_rudder			= param_find("AAH_TRIMRUDDER");
+    
+    // Command parameters
+    h->cmd_u                = param_find("AAH_CMDU");
+    h->cmd_alt              = param_find("AAH_CMDALT");
+    h->cmd_beta             = param_find("AAH_CMDBETA");
+    h->cmd_phi              = param_find("AAH_CMDPHI");
+    h->cmd_psi              = param_find("AAH_CMDPSI");
+    h->cmd_tracking         = param_find("AAH_CMDTRACKING");
     
     // Longitudinal Gain parameters
     h->gain_throttle		= param_find("AAH_GAINTHROTTL");
@@ -224,6 +300,14 @@ int aah_parameters_update(const struct aah_param_handles *h, struct aah_params *
     param_get(h->trim_elevator, &(p->trim_elevator));
     param_get(h->trim_aileron, &(p->trim_aileron));
     param_get(h->trim_rudder, &(p->trim_rudder));
+    
+    // Command parameters
+    param_get(h->cmd_u, &(p->cmd_u));
+    param_get(h->cmd_alt, &(p->cmd_alt));
+    param_get(h->cmd_beta, &(p->cmd_beta));
+    param_get(h->cmd_phi, &(p->cmd_phi));
+    param_get(h->cmd_psi, &(p->cmd_psi));
+    param_get(h->cmd_tracking, &(p->cmd_tracking));
     
     // Longitudinal Gain Parameters
     param_get(h->gain_throttle, &(p->gain_throttle));
