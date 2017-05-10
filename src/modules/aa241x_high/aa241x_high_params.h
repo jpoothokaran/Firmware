@@ -66,6 +66,15 @@ extern "C" {
         float trim_aileron;
         float trim_rudder;
         
+        // Commands
+        float cmd_u;
+        float cmd_alt;
+        
+        float cmd_beta;
+        float cmd_phi;
+        float cmd_psi;
+        float cmd_tracking;
+        
         // Longitudinal Gains
         float gain_throttle;
         float gain_altitude;
@@ -100,6 +109,15 @@ extern "C" {
         param_t trim_elevator;
         param_t trim_aileron;
         param_t trim_rudder;
+        
+        // Commands
+        param_t cmd_u;
+        param_t cmd_alt;
+        
+        param_t cmd_beta;
+        param_t cmd_phi;
+        param_t cmd_psi;
+        param_t cmd_tracking;
         
         // Longitudinal Gains
         param_t gain_throttle;
