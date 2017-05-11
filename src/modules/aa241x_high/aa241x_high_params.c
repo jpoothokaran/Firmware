@@ -61,7 +61,7 @@ PARAM_DEFINE_FLOAT(AAH_TRIMTHROTTL, 0.0f);
  *
  *Default elevator trim will be 0
  *
- * @unit radians			(the unit attribute (not required, just helps for sanity))
+ * @unit degrees			(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
 PARAM_DEFINE_FLOAT(AAH_TRIMELEV, 0.0f);
@@ -71,7 +71,7 @@ PARAM_DEFINE_FLOAT(AAH_TRIMELEV, 0.0f);
  *
  *Default aileron trim will be 0
  *
- * @unit radians			(the unit attribute (not required, just helps for sanity))
+ * @unit degrees			(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
 PARAM_DEFINE_FLOAT(AAH_TRIMAILERON, 0.0f);
@@ -81,7 +81,7 @@ PARAM_DEFINE_FLOAT(AAH_TRIMAILERON, 0.0f);
  *
  *Default rudder trim will be 0
  *
- * @unit radians			(the unit attribute (not required, just helps for sanity))
+ * @unit degrees			(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
 PARAM_DEFINE_FLOAT(AAH_TRIMRUDDER, 0.0f);
@@ -202,7 +202,7 @@ PARAM_DEFINE_FLOAT(AAH_CMDALT, 50.0f);
  *
  *Default sideslip will be zero
  *
- * @unit radians				(the unit attribute (not required, just helps for sanity))
+ * @unit degrees				(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
 PARAM_DEFINE_FLOAT(AAH_CMDBETA, 0.0f);
@@ -213,7 +213,7 @@ PARAM_DEFINE_FLOAT(AAH_CMDBETA, 0.0f);
  *
  *Default roll command will be 0
  *
- * @unit radians				(the unit attribute (not required, just helps for sanity))
+ * @unit degrees				(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
 PARAM_DEFINE_FLOAT(AAH_CMDPHI, 0.0f);
@@ -224,7 +224,7 @@ PARAM_DEFINE_FLOAT(AAH_CMDPHI, 0.0f);
  *
  *Default heading will be 0 (north? or initial orientation?)
  *
- * @unit radians				(the unit attribute (not required, just helps for sanity))
+ * @unit degrees				(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
 PARAM_DEFINE_FLOAT(AAH_CMDPSI, 0.0f);
@@ -291,8 +291,8 @@ int aah_parameters_init(struct aah_param_handles *h)
     // Lateral Gain parameters
     h->gain_yawrate			= param_find("AAH_GAINYAWRATE");
     h->gain_beta			= param_find("AAH_GAINBETA");
-    h->gain_phi			= param_find("AAH_GAINPHI");
-    h->gain_psi			= param_find("AAH_GAINPSI");
+    h->gain_phi		    	= param_find("AAH_GAINPHI");
+    h->gain_psi			    = param_find("AAH_GAINPSI");
     h->gain_tracking		= param_find("AAH_GAINTRACK");
     
     
