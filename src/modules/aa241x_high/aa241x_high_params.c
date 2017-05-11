@@ -253,7 +253,7 @@ PARAM_DEFINE_INT32(AAH_CASE, 0);
 
 
 //rollgain
-PARAM_DEFINE_FLOAT(AAH_PROPROLLGAIN, -1.0f);
+PARAM_DEFINE_FLOAT(AAH_PROPROLLGAIN, 0.004f);
 
 
 int aah_parameters_init(struct aah_param_handles *h)
