@@ -60,6 +60,8 @@ extern "C" {
      */
     struct aah_params {
         
+        float ctrl_case;
+        
         // Trims
         float trim_throttle;
         float trim_elevator;
@@ -103,6 +105,8 @@ extern "C" {
      *  (makes life easier if they are)
      */
     struct aah_param_handles {
+        
+        param_t ctrl_case;
         
         // Trims
         param_t trim_throttle;
