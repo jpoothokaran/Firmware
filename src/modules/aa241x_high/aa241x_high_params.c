@@ -240,6 +240,17 @@ PARAM_DEFINE_FLOAT(AAH_CMDPSI, 0.0f);
  */
 PARAM_DEFINE_FLOAT(AAH_CMDTRACKING, 0.0f);
 
+/**
+ *Case Logic for Control Case
+ *Allows us to have multiple
+ *
+ *Default case will be zero, manual control
+ *
+ * @unit none				(the unit attribute (not required, just helps for sanity))
+ * @group AA241x High Params		(always include this)
+ */
+PARAM_DEFINE_INT32(AAH_CASE, 0);
+
 
 //rollgain
 PARAM_DEFINE_FLOAT(AAH_PROPROLLGAIN, -1.0f);
@@ -255,6 +266,8 @@ int aah_parameters_init(struct aah_param_handles *h)
      * NOTE: the string passed to param_find is the same as the name provided
      * in the above PARAM_DEFINE_FLOAT
      */
+    // Case integer
+    h->ctrl_case            = param_find("AAH_CASE");
     
     // Trim parameters
     h->trim_throttle		= param_find("AAH_TRIMTHROTTL");
@@ -294,6 +307,9 @@ int aah_parameters_update(const struct aah_param_handles *h, struct aah_params *
     
     // for each of your custom parameters, make sure to add this line with
     // the corresponding variable name
+    
+    // Case integer
+    param_get(h->ctrl_case, &(p->ctrl_case));
     
     // Trim parameters
     param_get(h->trim_throttle, &(p->trim_throttle));
