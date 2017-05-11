@@ -63,6 +63,16 @@ using namespace aa241x_high;
 void flight_control() {
     
     float my_float_variable = 0.0f;		/**< example float variable */
+    // float my_low_data = low_data.field1;      // getting low data value example
+    // high_data.field1 = my_float_variable;     // setting high data value example
+    
+    float max_aileron_deflection = 30.0f; // in degrees, used to scale input from [-1; 1] to [-30 deg; 30 deg]
+    float max_elevator_deflection = 30.0f; // in degrees
+    float max_rudder_deflection = 30.0f; // in degrees
+    // Not sure of throttle units, right now just a range from 0 to 1 so no scaling factor to servos
+    
+    float deg2rad = 0.01745329f;
+    float rad2deg = 57.2957795f;
     
     
     // An example of how to run a one time 'setup' for example to lock one's altitude and heading...
@@ -72,102 +82,100 @@ void flight_control() {
         altitude_desired = position_D_baro; 		// altitude_desired needs to be declared outside flight_control() function
     }
     
-    
     // TODO: write all of your flight control here...
+    // Make sure servo out values are defined in case of a breakdown in control logic in this code
+    throttle_servo_out = man_throttle_in + aah_parameters.trim_throttle; //throttle has no scaling factor
+    pitch_servo_out = man_pitch_in + aah_parameters.trim_elevator / max_elevator_deflection;
+    yaw_servo_out = man_yaw_in + aah_parameters.trim_rudder / max_rudder_deflection;
+    roll_servo_out = man_roll_in + aah_parameters.trim_aileron / max_aileron_deflection;
     
-    
-    // getting low data value example
-    // float my_low_data = low_data.field1;
-    
-    // setting high data value example
-    high_data.field1 = my_float_variable;
-    
-    
-    // // Make a really simple proportional roll stabilizer // //
-    //
-    
-    roll_desired = aah_parameters.cmd_phi; // roll_desired already exists in aa241x_high_aux so no need to repeat float declaration
-    if(1)//stabilized_roll) //this could be a boolean set globally. stabilized means limited flight envelope
-    {
-        roll_desired = man_roll_in; // radians
+    // Begin control law logic, Default case is 0, should not change manual input plus trim
+    if (aah_parameters.ctrl_case == 1) {        // Case 1: Simple roll stabilization
+        roll_command = aah_parameters.cmd_phi; //in degrees
         
-        float maxBankAngle = 30.0f; //degrees
-        if(roll_desired > maxBankAngle*0.01745f)
-        {
-            roll_desired = maxBankAngle*0.01745f;
+        //Limit desired roll so bank angle does not exceed max
+        float maxBankAngle = 45.0f;
+        if (roll_command > maxBankAngle) {
+            roll_command = maxBankAngle;
         }
-        else if(roll_desired < maxBankAngle*-0.01745f)
-        {
-            roll_desired = -maxBankAngle*0.01745f;
+        else if(roll_command < -maxBankAngle) {
+            roll_command = -maxBankAngle;
         }
-        //roll_desired = -maxBankAngle*0.01745f;
+        
+        // Execute proportional control
+        float delta_aileron = aah_parameters.proportional_roll_gain * (roll_command - roll); // Aileron deflection (in deg? probably)
+        
+        // Update servo commands (remember our control law is deviation from trim so we sum our perturbational change delta)
+        roll_servo_out = roll_servo_out + delta_aileron / max_aileron_deflection;
     }
-    float proportionalRollCorrection = aah_parameters.proportional_roll_gain * (roll_desired-roll);
-    // THE ABOVE LINE MAY WANT TO UPDATE PROPORTIONAL ROLL GAIN TO GAIN_PHI
-        // Now use your parameter gain and multiply by the error from desired
+    // #############################################################################################################################
+    else if (aah_parameters.ctrl_case == 2){     // Case 2: Longitudinal only, steady and level
+        u_command = aah_parameters.cmd_u
+        alt_command = aah_parameters.cmd_alt
         
-        
-        // Note the use of x.0f, this is important to specify that these are single and not double float values!
-        
-        // Do bounds checking to keep the roll correction within the -1..1 limits of the servo output
-        if (proportionalRollCorrection > 1.0f) {
-            proportionalRollCorrection = 1.0f;
-        } else if (proportionalRollCorrection < -1.0f ) {
-            proportionalRollCorrection = -1.0f;
+        //Check bounds on command inputs
+        float maxVelocity = 30.0f; // m/s
+        float minVelocity = 11.0f; // m/s
+        float maxAltitude = 100.0f; // meters, stay under 400ft
+        float minAltitude = 20.0f; // meters
+        if (u_command > maxVelocity) {
+            u_command = maxVelocity;
         }
-    
-    
-    // ENSURE THAT YOU SET THE SERVO OUTPUTS!!!
-    // outputs should be set to values between -1..1 (except throttle is 0..1)
-    // where zero is no actuation, and -1,1 are full throw in either the + or - directions
-    
-    // Set output of roll servo to the control law output calculated above
-    roll_servo_out = proportionalRollCorrection;
-//    pitch_servo_out = -man_pitch_in;
-//    yaw_servo_out = man_yaw_in;
-//    throttle_servo_out = man_throttle_in;
-    
-    
-    //Start of our own code. Code above this is roll stabilizer example
-    if (hrt_absolute_time() - previous_loop_timestamp > 500000.0f) { // Run if more than 0.5 seconds have passes since last loop,
+        else if(u_command < minVelocity) {
+            u_command = minVelocity;
+        }
+        if (alt_command > maxAltitude) {
+            alt_command = maxAltitude;
+        }
+        else if(alt_command < minAltitude) {
+            alt_command = minAltitude;
+        }
         
-        throttle_desired = man_throttle_in; 		//throttle is manually input
-        altitude_desired = position_D_baro; 		//position_D_baro is current position read by the firmware
+        // Execute proportional control
+        float delta_throttle = aah_parameters.gain_throttle*(u_command - speed_body_u);
+        float alt_measured = -position_D_baro;
+        float pitch_command = aah_parameters.gain_altitude*(alt_command - alt_measured); //Should be degrees
+        float delta_elevator = aah_parameters.gain_pitch*(pitch_command - pitch); //Should be degrees
+        
+        // Update servo outputs (remember our control law is deviation from trim so we sum our perturbational change delta)
+        throttle_servo_out = throttle_servo_out + delta_throttle;
+        pitch_servo_out = pitch_servo_out + delta_elevator / max_elevator_deflection;
+    }
+
+// ################################################################################################################################
+    else if (aah_parameters.ctrl_case == 3){      // Case 3: Full control with DR damping
+        float proportionalThrottleCorrection = aah_parameters.gain_throttle*(aah_parameters.cmd_u - speed_body_u);
+    
+        float proportionalPitchCorrection = aah_parameters.gain_altitude*(aah_parameters.cmd_alt - position_D_baro);
+    
+        float proportionalElevatorCorrection = aah_parameters.gain_pitch*(proportionalPitchCorrection - pitch);
+    
+        float elevatorOutput = -(pitch_trim + proportionalElevatorCorrection);	//negative to invert servo output
+        float throttleOutput = man_throttle_in + proportionalThrottleCorrection;
+    }
+    // ###################################################################################################################
+    
+    // Bounds check the servo outputs to keep within limits of [-1; 1] or [0;1] for throttle
+    if (throttle_servo_out > 1.0f) {
+        throttle_servo_out = 1.0f;
+    } else if (throttle_servo_out < 0.0f ) {
+        throttle_servo_out = 0.0f;
+    }
+    if (pitch_servo_out > 1.0f) {
+        pitch_servo_out = 1.0f;
+    } else if (pitch_servo_out < -1.0f ) {
+        pitch_servo_out = -1.0f;
+    }
+    if (roll_servo_out > 1.0f) {
+        roll_servo_out = 1.0f;
+    } else if (roll_servo_out < -1.0f ) {
+        roll_servo_out = -1.0f;
+    }
+    if (yaw_servo_out > 1.0f) {
+        yaw_servo_out = 1.0f;
+    } else if (yaw_servo_out < -1.0f ) {
+        yaw_servo_out = -1.0f;
     }
     
-    float proportionalThrottleCorrection = aah_parameters.gain_throttle*(aah_parameters.cmd_u - speed_body_u);
-    
-    float proportionalPitchCorrection = aah_parameters.gain_altitude*(aah_parameters.cmd_alt - position_D_baro);
-    
-    float proportionalElevatorCorrection = aah_parameters.gain_pitch*(proportionalPitchCorrection - pitch);
-    
-    float elevatorOutput = -(pitch_trim + proportionalElevatorCorrection);	//negative to invert servo output
-    float throttleOutput = man_throttle_in + proportionalThrottleCorrection;
-    
-    
-    
-    
-    
-    // Do bounds checking to keep the elevator output within the -1..1 limits of the servo output
-    if (elevatorOutput > 1.0f) {
-        elevatorOutput = 1.0f;
-    } else if (elevatorOutput < -1.0f ) {
-        elevatorOutput = -1.0f;
-    }
-    if (throttleOutput > 1.0f) {
-        throttleOutput = 1.0f;
-    } else if (throttleOutput < 0.0f ) {
-        throttleOutput = 0.0f;
-    }
-    
-    
-    //pitch_servo_out = elevatorOutput;
-    //throttle_servo_out = throttleOutput;
-    
-    //roll_servo_out = -1.0f;
-    // as an example, just passing through manual control to everything but roll
-    pitch_servo_out = 1.0f;
-    yaw_servo_out = -1.0f;
-    throttle_servo_out = man_throttle_in;
     
 }
