@@ -67,8 +67,8 @@ void flight_control() {
     // high_data.field1 = my_float_variable;     // setting high data value example
     
     float max_aileron_deflection = 30.0f; // in degrees, used to scale input from [-1; 1] to [-30 deg; 30 deg]
-    float max_elevator_deflection = 30.0f; // in degrees
-    float max_rudder_deflection = 30.0f; // in degrees
+    float max_elevator_deflection = 25.0f; // in degrees
+    float max_rudder_deflection = 25.0f; // in degrees
     // Not sure of throttle units, right now just a range from 0 to 1 so no scaling factor to servos
     
     float deg2rad = 0.01745329f;
@@ -90,6 +90,7 @@ void flight_control() {
     roll_servo_out = man_roll_in + aah_parameters.trim_aileron / max_aileron_deflection;
     
     // Begin control law logic, Default case is 0, should not change manual input plus trim
+    // #####################################################################################################################
     if (aah_parameters.ctrl_case == 1) {        // Case 1: Simple roll stabilization
         roll_command = aah_parameters.cmd_phi; //in degrees
         
@@ -103,15 +104,15 @@ void flight_control() {
         }
         
         // Execute proportional control
-        float delta_aileron = aah_parameters.proportional_roll_gain * (roll_command - roll); // Aileron deflection (in deg? probably)
+        float delta_aileron = aah_parameters.proportional_roll_gain * (roll_command - roll*rad2deg); // Aileron deflection (in deg? probably)
         
         // Update servo commands (remember our control law is deviation from trim so we sum our perturbational change delta)
         roll_servo_out = roll_servo_out + delta_aileron / max_aileron_deflection;
     }
     // #############################################################################################################################
     else if (aah_parameters.ctrl_case == 2){     // Case 2: Longitudinal only, steady and level
-        u_command = aah_parameters.cmd_u
-        alt_command = aah_parameters.cmd_alt
+        u_command = aah_parameters.cmd_u;
+        alt_command = aah_parameters.cmd_alt;
         
         //Check bounds on command inputs
         float maxVelocity = 30.0f; // m/s
@@ -135,15 +136,54 @@ void flight_control() {
         float delta_throttle = aah_parameters.gain_throttle*(u_command - speed_body_u);
         float alt_measured = -position_D_baro;
         float pitch_command = aah_parameters.gain_altitude*(alt_command - alt_measured); //Should be degrees
-        float delta_elevator = aah_parameters.gain_pitch*(pitch_command - pitch); //Should be degrees
+        float delta_elevator = aah_parameters.gain_pitch*(pitch_command - pitch*rad2deg); //Should be degrees
+        
         
         // Update servo outputs (remember our control law is deviation from trim so we sum our perturbational change delta)
         throttle_servo_out = throttle_servo_out + delta_throttle;
         pitch_servo_out = pitch_servo_out + delta_elevator / max_elevator_deflection;
     }
 
+        // #############################################################################################################################
+    else if (aah_parameters.ctrl_case == 3){     // Case 3: Longitudinal steady level, with roll stabilization
+        u_command = aah_parameters.cmd_u;
+        alt_command = aah_parameters.cmd_alt;
+        float roll_command = 0.0f;
+        
+        //Check bounds on command inputs
+        float maxVelocity = 30.0f; // m/s
+        float minVelocity = 11.0f; // m/s
+        float maxAltitude = 100.0f; // meters, stay under 400ft
+        float minAltitude = 20.0f; // meters
+        if (u_command > maxVelocity) {
+            u_command = maxVelocity;
+        }
+        else if(u_command < minVelocity) {
+            u_command = minVelocity;
+        }
+        if (alt_command > maxAltitude) {
+            alt_command = maxAltitude;
+        }
+        else if(alt_command < minAltitude) {
+            alt_command = minAltitude;
+        }
+        
+        // Execute proportional control
+        float delta_throttle = aah_parameters.gain_throttle*(u_command - speed_body_u);
+        float alt_measured = -position_D_baro;
+        float pitch_command = aah_parameters.gain_altitude*(alt_command - alt_measured); //Should be degrees
+        float delta_elevator = aah_parameters.gain_pitch*(pitch_command - pitch*rad2deg); //Should be degrees
+        float delta_aileron = aah_parameters.proportional_roll_gain * (roll_command - roll*rad2deg); // Aileron deflection (in deg? probably)
+        
+        // Update servo outputs (remember our control law is deviation from trim so we sum our perturbational change delta)
+        throttle_servo_out = throttle_servo_out + delta_throttle;
+        pitch_servo_out = pitch_servo_out + delta_elevator / max_elevator_deflection;
+        roll_servo_out = roll_servo_out + delta_aileron / max_aileron_deflection;
+
+    }
+
 // ################################################################################################################################
-    else if (aah_parameters.ctrl_case == 3){      // Case 3: Full control with DR damping
+    else if (aah_parameters.ctrl_case == 4){      // Case 4: Full control with DR damping
         float proportionalThrottleCorrection = aah_parameters.gain_throttle*(aah_parameters.cmd_u - speed_body_u);
     
         float proportionalPitchCorrection = aah_parameters.gain_altitude*(aah_parameters.cmd_alt - position_D_baro);
@@ -154,7 +194,70 @@ void flight_control() {
         float throttleOutput = man_throttle_in + proportionalThrottleCorrection;
     }
     // ###################################################################################################################
+    else if (aah.parameters.ctrl_case == 5){      // Case 5: Full control without DR damping, has heading, no tracking
+        u_command = aah_parameters.cmd_u;
+        alt_command = aah_parameters.cmd_alt;
+        beta_command = aah_parameters.cmd_beta;
+        phi_command = aah_parameters.cmd_phi;
+        psi_command = aah_parameters.cmd_psi;
+            
+        //Check bounds on command inputs
+        float maxVelocity = 30.0f; // m/s
+        float minVelocity = 11.0f; // m/s
+        float maxAltitude = 100.0f; // meters, stay under 400ft
+        float minAltitude = 20.0f; // meters
+        float maxBankAngle = 45.0f; // degrees
+        float maxSideslipAngle = 10.0f; // degrees
+        float minHeading = -180.0f; // degrees
+        float maxHeading = 180.0f; // degrees
+        
+        if (psi_command > maxHeading){
+            psi_command = psi_command - 360.0f;
+        }
+        else if (psi_command < minHeading){
+            psi_command = psi_command + 360.0f;
+        }
+        if (phi_command > maxBankAngle) {
+            phi_command = maxBankAngle;
+        }
+        else if(phi_command < -maxBankAngle) {
+            phi_command = -maxBankAngle;
+        }
+        if (beta_command > maxSideslipAngle){
+            beta_command = maxSideslipAngle;
+        }
+        else if (beta_command < -maxSideslipAngle){
+            beta_command = -maxSideslipAngle;
+        }
+        if (u_command > maxVelocity) {
+            u_command = maxVelocity;
+        }
+        else if(u_command < minVelocity) {
+            u_command = minVelocity;
+        }
+        if (alt_command > maxAltitude) {
+            alt_command = maxAltitude;
+        }
+        else if(alt_command < minAltitude) {
+            alt_command = minAltitude;
+        }
+        
+        // Execute proportional control
+        float delta_throttle = aah_parameters.gain_throttle*(u_command - speed_body_u);
+        float alt_measured = -position_D_baro;
+        float pitch_command = aah_parameters.gain_altitude*(alt_command - alt_measured); //Should be degrees
+        float delta_elevator = aah_parameters.gain_pitch*(pitch_command - pitch*rad2deg); //Should be degrees
+        float delta_aileron = aah_parameters.gain_phi*(phi_command - roll*rad2deg); //Should be in degrees
+        float delta_rudder = aah_parameters.gain_psi*(psi_command - yaw*rad2deg); //Should be in degrees
+        
+        // Update servo outputs (remember our control law is deviation from trim so we sum our perturbational change delta)
+        throttle_servo_out = throttle_servo_out + delta_throttle;
+        pitch_servo_out = pitch_servo_out + delta_elevator / max_elevator_deflection;
+        roll_servo_out = roll_servo_out + delta_aileron / max_aileron_deflection;
+        yaw_servo_out = yaw_servo_out + delta_rudder / max_rudder_deflection;
+    }
     
+    // ############################################################################################################
     // Bounds check the servo outputs to keep within limits of [-1; 1] or [0;1] for throttle
     if (throttle_servo_out > 1.0f) {
         throttle_servo_out = 1.0f;
