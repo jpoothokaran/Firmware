@@ -66,31 +66,49 @@ void flight_control() {
     //float my_float_variable = 0.0f;		/**< example float variable */
     // float my_low_data = low_data.field1;      // getting low data value example
     // high_data.field1 = my_float_variable;     // setting high data value example
-    
-    float max_aileron_deflection = 30.0f; // in degrees, used to scale input from [-1; 1] to [-30 deg; 30 deg]
-    float max_elevator_deflection = 25.0f; // in degrees
-    float max_rudder_deflection = 25.0f; // in degrees
-    // Not sure of throttle units, right now just a range from 0 to 1 so no scaling factor to servos
-    
-    //float deg2rad = 0.01745329f;
+        
+    float deg2rad = 0.01745329f;
     float rad2deg = 57.2957795f;
+    const float PI = 3.1415927;
+    
+    float max_aileron_deflection = 30.0f * deg2rad; // in rads, used to scale input from [-1; 1] to [-30 deg; 30 deg]
+    float max_elevator_deflection = 25.0f * deg2rad; // in rads
+    float max_rudder_deflection = 25.0f * deg2rad; // in rads
+    // Not sure of throttle units, right now just a range from 0 to 1 so no scaling factor to servos
+
     
     
     // An example of how to run a one time 'setup' for example to lock one's altitude and heading...
     if (hrt_absolute_time() - previous_loop_timestamp > 500000.0f) { // Run if more than 0.5 seconds have passes since last loop,
         //these four variables are logged so might as well set them, more data is better
-        roll_desired=roll;
+        roll_desired=roll;    // yaw_desired already defined in aa241x_high_aux.h
         pitch_desired=pitch;
         yaw_desired=yaw;
         throttle_desired=throttle_servo_out;
         //	should only occur on first engagement since this is 59Hz loop
-        float psi_initial = yaw*rad2deg; 							// yaw_desired already defined in aa241x_high_aux.h
+        float psi_initial = yaw;
         float altitude_initial = -position_D_baro; 		// altitude_desired needs to be declared outside flight_control() function
         float u_initial = speed_body_u;
         //line tracking initialization using position north and east, and the slope of the inital heading
         //the values of ya and yb correspond to a line defined by y = ya * x + yb
         //y is negative east axis and x is north axis
-        //according to inital position and heading  -(x - position_E) = tan(-yaw)*(y - position_N)
+        //according to inital position and heading  (y - -position_E) = tan(-yaw)*(x - position_N)
+        //0 = tan(-yaw)*x - y + (-position_E - tan(-yaw)*position_N)
+        //Then distance off path is d = abs(a*x0 + b*y0 + c)/sqrtf(1.0f+powf(tan(-yaw),2.0f))
+        //convention for positive distance is to the right of the line
+        float x0 = position_N;
+        float y0 = -position_E;
+        float a = tanf(-yaw);
+        float b = -1.0f;
+        float c = -position_E - tanf(-yaw) * position_N;
+        float sign_convention = 0.0f;
+        //Note there may be issues pointing near directly east or west for the tangent function
+        if (abs(yaw) > PI/2.0f ) {
+            sign_convention = -1.0;
+        }
+        else {
+            sign_convention = 1.0;
+        }
     }
     
     // TODO: write all of your flight control here...
@@ -102,14 +120,40 @@ void flight_control() {
     
     // Begin control law logic, Default case is 0, does not take commanded parameters, holds current heading altitude and speed as well as try to follow line
     if (aah_parameters.ctrl_case == 0) {
+        float x = position_N;
+        float y = -position_E;
+        float d = sign_convention(a*x + b*y + c)/sqrtf(1.0f+powf(a,2.0f)); //perpendicular distance off line (y in matlab code)
+        
+        //commands
+        float d_command = 0.0f;
+        float beta_command = 0.0f;
+        float u_command = u_initial;
+        float alt_command = alt_initial;
+        
+        //Execute proportional control
+        float delta_throttle = aah_parameters.gain_throttle*(u_command - speed_body_u);
+        float alt_measured = -position_D_baro;
+        float pitch_command = aah_parameters.gain_altitude*(alt_command - alt_measured); //Should be a radian output
+        float delta_elevator = aah_parameters.gain_pitch*(pitch_command - pitch); //Should be in rads
+        
+        float psi_command = aah_parameters.gain_tracking*(d_command - d); // tracking gain (y in matlab)
+        float phi_command = aah_parameters.gain_psi*(psi_command - yaw);
+        float delta_aileron = aah_parameters.gain_phi*(phi_command - roll); //Should be in rads
+        float delta_rudder = aah_parameters.gain_beta*(beta_command - speed_body_v/speed_body_u); //Should be in rads, small angle approx of beta
+        
+        // Update servo outputs (remember our control law is deviation from trim so we sum our perturbational change delta)
+        throttle_servo_out = throttle_servo_out + delta_throttle;
+        pitch_servo_out = pitch_servo_out + delta_elevator / max_elevator_deflection;
+        roll_servo_out = roll_servo_out + delta_aileron / max_aileron_deflection;
+        yaw_servo_out = yaw_servo_out + delta_rudder / max_rudder_deflection;
         
     }
     // #####################################################################################################################
     if (aah_parameters.ctrl_case == 1) {        // Case 1: Simple roll stabilization
-        roll_command = aah_parameters.cmd_phi; //in degrees
+        roll_command = aah_parameters.cmd_phi * deg2rad; //in rad, qgroundcontrol input in degrees
         
         //Limit desired roll so bank angle does not exceed max
-        float maxBankAngle = 45.0f;
+        float maxBankAngle = 45.0f * deg2rad;
         if (roll_command > maxBankAngle) {
             roll_command = maxBankAngle;
         }
@@ -118,7 +162,7 @@ void flight_control() {
         }
         
         // Execute proportional control
-        float delta_aileron = aah_parameters.proportional_roll_gain * (roll_command - roll*rad2deg); // Aileron deflection (in deg? probably)
+        float delta_aileron = aah_parameters.proportional_roll_gain * (roll_command - roll); // Aileron deflection (in deg? probably)
         
         // Update servo commands (remember our control law is deviation from trim so we sum our perturbational change delta)
         roll_servo_out = roll_servo_out + delta_aileron / max_aileron_deflection;
@@ -149,8 +193,8 @@ void flight_control() {
         // Execute proportional control
         float delta_throttle = aah_parameters.gain_throttle*(u_command - speed_body_u);
         float alt_measured = -position_D_baro;
-        float pitch_command = aah_parameters.gain_altitude*(alt_command - alt_measured); //Should be degrees
-        float delta_elevator = aah_parameters.gain_pitch*(pitch_command - pitch*rad2deg); //Should be degrees
+        float pitch_command = aah_parameters.gain_altitude*(alt_command - alt_measured); //Should be a radian output
+        float delta_elevator = aah_parameters.gain_pitch*(pitch_command - pitch); //Should be in rads
         
         
         // Update servo outputs (remember our control law is deviation from trim so we sum our perturbational change delta)
@@ -159,10 +203,10 @@ void flight_control() {
     }
 
         // #############################################################################################################################
-    else if (aah_parameters.ctrl_case == 3){     // Case 3: Longitudinal steady level, with roll stabilization
+    else if (aah_parameters.ctrl_case == 3){     // Case 3: Longitudinal steady level, with basic roll stabilization
         u_command = aah_parameters.cmd_u;
         alt_command = aah_parameters.cmd_alt;
-        float roll_command = 0.0f;
+        float roll_command = 0.0f; //in radians
         
         //Check bounds on command inputs
         float maxVelocity = 30.0f; // m/s
@@ -185,9 +229,9 @@ void flight_control() {
         // Execute proportional control
         float delta_throttle = aah_parameters.gain_throttle*(u_command - speed_body_u);
         float alt_measured = -position_D_baro;
-        float pitch_command = aah_parameters.gain_altitude*(alt_command - alt_measured); //Should be degrees
-        float delta_elevator = aah_parameters.gain_pitch*(pitch_command - pitch*rad2deg); //Should be degrees
-        float delta_aileron = aah_parameters.proportional_roll_gain * (roll_command - roll*rad2deg); // Aileron deflection (in deg? probably)
+        float pitch_command = aah_parameters.gain_altitude*(alt_command - alt_measured); //Should be rads
+        float delta_elevator = aah_parameters.gain_pitch*(pitch_command - pitch); //Should be rads
+        float delta_aileron = aah_parameters.proportional_roll_gain * (roll_command - roll); // Aileron deflection (in rad)
         
         // Update servo outputs (remember our control law is deviation from trim so we sum our perturbational change delta)
         throttle_servo_out = throttle_servo_out + delta_throttle;
@@ -220,16 +264,16 @@ void flight_control() {
         float minVelocity = 11.0f; // m/s
         float maxAltitude = 100.0f; // meters, stay under 400ft
         float minAltitude = 20.0f; // meters
-        float maxBankAngle = 45.0f; // degrees
-        float maxSideslipAngle = 10.0f; // degrees
-        float minHeading = -180.0f; // degrees
-        float maxHeading = 180.0f; // degrees
+        float maxBankAngle = 45.0f * deg2rad; // radians
+        float maxSideslipAngle = 10.0f *deg2rad; // radians
+        float minHeading = -180.0f * deg2rad; // radians
+        float maxHeading = 180.0f * deg2rad; // radians
         
         if (psi_command > maxHeading){
-            psi_command = psi_command - 360.0f;
+            psi_command = psi_command - PI;
         }
         else if (psi_command < minHeading){
-            psi_command = psi_command + 360.0f;
+            psi_command = psi_command + PI;
         }
         if (phi_command > maxBankAngle) {
             phi_command = maxBankAngle;
@@ -259,10 +303,10 @@ void flight_control() {
         // Execute proportional control
         float delta_throttle = aah_parameters.gain_throttle*(u_command - speed_body_u);
         float alt_measured = -position_D_baro;
-        float pitch_command = aah_parameters.gain_altitude*(alt_command - alt_measured); //Should be degrees
-        float delta_elevator = aah_parameters.gain_pitch*(pitch_command - pitch*rad2deg); //Should be degrees
-        float delta_aileron = aah_parameters.gain_phi*(phi_command - roll*rad2deg); //Should be in degrees
-        float delta_rudder = aah_parameters.gain_psi*(psi_command - yaw*rad2deg); //Should be in degrees
+        float pitch_command = aah_parameters.gain_altitude*(alt_command - alt_measured); //Should be rads
+        float delta_elevator = aah_parameters.gain_pitch*(pitch_command - pitch); //Should be rads
+        float delta_aileron = aah_parameters.gain_phi*(phi_command - roll); //Should be in rads
+        float delta_rudder = aah_parameters.gain_psi*(psi_command - yaw); //Should be in rads
         
         // Update servo outputs (remember our control law is deviation from trim so we sum our perturbational change delta)
         throttle_servo_out = throttle_servo_out + delta_throttle;
