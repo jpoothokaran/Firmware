@@ -95,7 +95,7 @@ PARAM_DEFINE_FLOAT(AAH_TRIMRUDDER, 0.0f);
  * @unit none				(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
-PARAM_DEFINE_FLOAT(AAH_GAINTHROTTL, 5563.0f);
+PARAM_DEFINE_FLOAT(AAH_GAINTHROTTL, 1.0f);
 
 /**
  *ALTITUDE GAIN
@@ -106,7 +106,7 @@ PARAM_DEFINE_FLOAT(AAH_GAINTHROTTL, 5563.0f);
  * @unit none				(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
-PARAM_DEFINE_FLOAT(AAH_GAINALT, 0.2f);
+PARAM_DEFINE_FLOAT(AAH_GAINALT, 0.05f);
 
 /**
  *PITCH GAIN
@@ -117,7 +117,7 @@ PARAM_DEFINE_FLOAT(AAH_GAINALT, 0.2f);
  * @unit none				(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
-PARAM_DEFINE_FLOAT(AAH_GAINPITCH, -110.8f);
+PARAM_DEFINE_FLOAT(AAH_GAINPITCH, -6.0f);
 
 /**
  *YAW RATE GAIN
@@ -139,7 +139,7 @@ PARAM_DEFINE_FLOAT(AAH_GAINYAWRATE, 50.5f);
  * @unit none				(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
-PARAM_DEFINE_FLOAT(AAH_GAINBETA, 60.0f);
+PARAM_DEFINE_FLOAT(AAH_GAINBETA, 65.0f);
 
 /**
  *ROLL GAIN
@@ -161,7 +161,7 @@ PARAM_DEFINE_FLOAT(AAH_GAINPHI, 0.04f);
  * @unit none				(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
-PARAM_DEFINE_FLOAT(AAH_GAINPSI, 4500.0f);
+PARAM_DEFINE_FLOAT(AAH_GAINPSI, 10.0f);
 
 /**
  *TRACKING GAIN
@@ -172,7 +172,7 @@ PARAM_DEFINE_FLOAT(AAH_GAINPSI, 4500.0f);
  * @unit none				(the unit attribute (not required, just helps for sanity))
  * @group AA241x High Params		(always include this)
  */
-PARAM_DEFINE_FLOAT(AAH_GAINTRACK, 1.0f);
+PARAM_DEFINE_FLOAT(AAH_GAINTRACK, -0.7f);
 
 /**
  *Velocity command U
