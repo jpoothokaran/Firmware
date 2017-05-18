@@ -42,10 +42,11 @@
  */
 
 #include <uORB/uORB.h>
-
+#include <math.h>
 // include header file
 #include "aa241x_high_control_law.h"
 #include "aa241x_high_aux.h"
+
 
 // needed for variable names
 using namespace aa241x_high;
@@ -62,7 +63,7 @@ using namespace aa241x_high;
 
 void flight_control() {
     
-    float my_float_variable = 0.0f;		/**< example float variable */
+    //float my_float_variable = 0.0f;		/**< example float variable */
     // float my_low_data = low_data.field1;      // getting low data value example
     // high_data.field1 = my_float_variable;     // setting high data value example
     
@@ -71,15 +72,25 @@ void flight_control() {
     float max_rudder_deflection = 25.0f; // in degrees
     // Not sure of throttle units, right now just a range from 0 to 1 so no scaling factor to servos
     
-    float deg2rad = 0.01745329f;
+    //float deg2rad = 0.01745329f;
     float rad2deg = 57.2957795f;
     
     
     // An example of how to run a one time 'setup' for example to lock one's altitude and heading...
     if (hrt_absolute_time() - previous_loop_timestamp > 500000.0f) { // Run if more than 0.5 seconds have passes since last loop,
+        //these four variables are logged so might as well set them, more data is better
+        roll_desired=roll;
+        pitch_desired=pitch;
+        yaw_desired=yaw;
+        throttle_desired=throttle_servo_out;
         //	should only occur on first engagement since this is 59Hz loop
-        yaw_desired = yaw; 							// yaw_desired already defined in aa241x_high_aux.h
-        altitude_desired = position_D_baro; 		// altitude_desired needs to be declared outside flight_control() function
+        float psi_initial = yaw*rad2deg; 							// yaw_desired already defined in aa241x_high_aux.h
+        float altitude_initial = -position_D_baro; 		// altitude_desired needs to be declared outside flight_control() function
+        float u_initial = speed_body_u;
+        //line tracking initialization using position north and east, and the slope of the inital heading
+        //the values of ya and yb correspond to a line defined by y = ya * x + yb
+        //y is negative east axis and x is north axis
+        //according to inital position and heading  -(x - position_E) = tan(-yaw)*(y - position_N)
     }
     
     // TODO: write all of your flight control here...
@@ -89,7 +100,10 @@ void flight_control() {
     yaw_servo_out = man_yaw_in + aah_parameters.trim_rudder / max_rudder_deflection;
     roll_servo_out = man_roll_in + aah_parameters.trim_aileron / max_aileron_deflection;
     
-    // Begin control law logic, Default case is 0, should not change manual input plus trim
+    // Begin control law logic, Default case is 0, does not take commanded parameters, holds current heading altitude and speed as well as try to follow line
+    if (aah_parameters.ctrl_case == 0) {
+        
+    }
     // #####################################################################################################################
     if (aah_parameters.ctrl_case == 1) {        // Case 1: Simple roll stabilization
         roll_command = aah_parameters.cmd_phi; //in degrees
