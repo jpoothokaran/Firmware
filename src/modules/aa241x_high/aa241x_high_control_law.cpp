@@ -105,12 +105,12 @@ void flight_control() {
         //float psi_initial = yaw;
         alt_initial = -position_D_gps; 		
         u_initial = speed_body_u;
-		
-		//initial servo commands at time of switch
-		servo_throttle_initial = man_throttle_in;
-		servo_elevator_initial = man_pitch_in;
-		servo_rudder_initial = man_yaw_in;
-		servo_aileron_initial = man_roll_in;
+
+        //initial servo commands at time of switch
+        servo_throttle_initial = man_throttle_in;
+        servo_elevator_initial = man_pitch_in;
+        servo_rudder_initial = man_yaw_in;
+        servo_aileron_initial = man_roll_in;
 		
         //line tracking initialization using position north and east, and the slope of the inital heading
         //y is negative east axis and x is north axis
@@ -451,9 +451,24 @@ void flight_control() {
     
     // ############################################################################################################
     // Store data to write to pixhawk output, will help analyze our control low easier
-	high_data.variable_name1 = roll;
-	high_data.variable_name1 = roll;
-	
+    //initial states
+    high_data.variable_name1 = roll_desired;
+    high_data.variable_name2 = pitch_desired;
+    high_data.variable_name3 = yaw_desired;
+    high_data.variable_name4 = throttle_desired;
+    high_data.variable_name5 = alt_initial;
+    high_data.variable_name6 = u_initial;
+    high_data.variable_name7 = servo_aileron_initial;
+    high_data.variable_name8 = servo_elevator_initial;
+    high_data.variable_name9 = servo_throttle_initial;
+    high_data.variable_name10 = servo_rudder_initial;
+    // intermediate commands
+    high_data.variable_name11 = pitch_command;
+    high_data.variable_name12 = yaw_temp;
+    high_data.variable_name13 = phi_command;
+    high_data.variable_name14 = u_command;
+    high_data.variable_name15 = alt_command;
+    high_data.variable_name16 = heading_command;
 	
 	
 	
