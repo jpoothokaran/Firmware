@@ -165,7 +165,11 @@ void flight_control() {
         float delta_throttle = aah_parameters.gain_throttle*(u_command - speed_body_u);
         float alt_measured = -position_D_baro;
         float pitch_command = aah_parameters.gain_altitude*(alt_command - alt_measured); //Should be a radian output
-        float delta_elevator = aah_parameters.gain_pitch*(pitch_command + pitch_desired - pitch); //Should be in rads
+        float pitch_temp = pitch_command + pitch_desired
+        if (pitch_temp < -0.175) {
+            pitch_temp = -0.175
+        }
+        float delta_elevator = aah_parameters.gain_pitch*(pitch_temp - pitch); //Should be in rads
         // pitch_desired is the initial (aka trim) pitch to fly at so we want to address deviations from that condition
         
         psi_command = aah_parameters.gain_tracking*(d_command - d); // tracking gain (y in matlab)
@@ -220,7 +224,11 @@ void flight_control() {
         float delta_throttle = aah_parameters.gain_throttle*(u_command - speed_body_u);
         float alt_measured = -position_D_baro;
         float pitch_command = aah_parameters.gain_altitude*(alt_command - alt_measured); //Should be a radian output
-        float delta_elevator = aah_parameters.gain_pitch*(pitch_command + pitch_desired - pitch); //Should be in rads
+        float pitch_temp = pitch_command + pitch_desired
+        if (pitch_temp < -0.175) {
+            pitch_temp = -0.175
+        }
+        float delta_elevator = aah_parameters.gain_pitch*(pitch_temp - pitch); //Should be in rads
         // pitch_desired is the initial (aka trim) pitch to fly at so we want to address deviations from that condition
         
         psi_command = aah_parameters.gain_tracking*(d_command - d); // tracking gain (y in matlab)
@@ -309,7 +317,11 @@ void flight_control() {
         float delta_throttle = aah_parameters.gain_throttle*(u_command - speed_body_u);
         float alt_measured = -position_D_baro;
         float pitch_command = aah_parameters.gain_altitude*(alt_command - alt_measured); //Should be a radian output
-        float delta_elevator = aah_parameters.gain_pitch*(pitch_command + pitch_desired - pitch); //Should be in rads
+        float pitch_temp = pitch_command + pitch_desired
+        if (pitch_temp < -0.175) { //10 degree pitch down limit
+            pitch_temp = -0.175
+        }
+        float delta_elevator = aah_parameters.gain_pitch*(pitch_temp - pitch); //Should be in rads
         // pitch_desired is the initial (aka trim) pitch to fly at so we want to address deviations from that condition
         
         psi_command = aah_parameters.gain_tracking*(d_command - d); // tracking gain (y in matlab)
