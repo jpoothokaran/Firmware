@@ -73,15 +73,24 @@ for each pair of points in output_points
    CL2 = (x2 + r*cos(phi), y2 - sin(phi));
 }
 */
+        float input_points[3][3] = ({
+		10, 19, 10;
+		300, 129, 10;
+		700, 310, 10;
+	});
+        float goalRadius = 10;
+        x = input_points[0][0];
+        y = input_points[0][1];
+        float distance; 
+        int visited = 0;
 
 /*
  * This loop executes at ~50Hz, but is not guaranteed to be 50Hz every time.
  */
-void low_loop()
+void low_loop((visited < length(input_points)) || (distance > goalRadius))
 {
-        // calculate the shortest path by TSP
-        input_points;
-	queue<int> unvisited;
+        // check the distance between the plane and the first point
+        distance = sqrt((x-x0)^2 + (y-y0)^2);
         // ouput_points = tsp(input_points);
         float Radius = r;
         float angle = yaw;
@@ -95,14 +104,18 @@ void low_loop()
 	
 	float diff;
 	
+	// compensate for the angle difference between the actual angle and desired angle
 	if((-180 < angle - goal_angle < 0) || (0 < angle - goal_angle < 180)){
 		diff = angle - goal_angle;
 	}
+	else if (-360 < angle - goal_angle <= -180){
+		diff = angle - goal_angle + 360;
+	}
 	else {
-		diff = angle - goal_angle + 2*PI;
+		diff = angle - goal_angle - 360;
 	}
 	
-	// choose path for each point pair
+	// determine which mode to take, straight line, left turn or right turn, and output corresponding parameters to high control law
 	if (-10 < diff < 10){
 	float low_data.field1 = 0;
         float low_data.field2 = 0;
@@ -126,6 +139,22 @@ void low_loop()
 	        float low_data.field2 = y0;
 	        float low_data.field2 = x;
 	        float low_data.field2 = y;
+	}
+	
+	// check whether the plane reaches the radius range of a certain point, and if yes, then change the goal to the next point
+       	float x0 = position_N;
+	float y0 = -position_E;
+        distance = sqrt((x-x0)^2 + (y-y0)^2);;
+	
+        if (distance <= goalRadius) {
+		if (visited == length(input_points)){
+			break
+		}
+                else{
+                        visited += 1;
+                        x = input_points[visited][0];
+			y = input_points[visited][1];
+		}
 	}
 	
 
