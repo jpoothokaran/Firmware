@@ -45,9 +45,14 @@
 // include header file
 #include "aa241x_low_control_law.h"
 #include "aa241x_low_aux.h"
+#include<stdio.h>
+#include<conio.h>
+#include<iostream>
+#include <queue>          // std::queue
+//using namespace std;
 
 #include <uORB/uORB.h>
-
+#define PI 3.14159265
 using namespace aa241x_low;
 
 /**
@@ -56,20 +61,116 @@ using namespace aa241x_low;
  * This is the only function that is executed at a set interval,
  * feel free to add all the function you'd like, but make sure all
  * the code you'd like executed on a loop is in this function.
- *
+ */
+
+/*
+// calculate the coordinates of four possible center of circles, 
+for each pair of points in output_points
+{
+   CR1 = (x1 + r*cos(phi), y1 - sin(phi));
+   CL1 = (x1 + r*cos(phi), y1 - sin(phi));
+   CR2 = (x2 + r*cos(phi), y2 - sin(phi));
+   CL2 = (x2 + r*cos(phi), y2 - sin(phi));
+}
+*/
+
+/*
  * This loop executes at ~50Hz, but is not guaranteed to be 50Hz every time.
  */
 void low_loop()
 {
-
-	float my_float_variable = 0.0f;		/**< example float variable */
-
+        // calculate the shortest path by TSP
+        input_points;
+	queue<int> unvisited;
+        // ouput_points = tsp(input_points);
+        float Radius = r;
+        float angle = yaw;
+	float x0 = position_N;
+	float y0 = -position_E;
+	int case ; // case variable (case = 0 go straight, case = 1 left bank, case = 2 right bank)
+	float goal_angle = atan2 (x - x0, y - y0) * 180 / PI; //set the goal angle in degrees
 
 	// getting high data value example
 	// float my_high_data = high_data.field1;
+	
+	float diff;
+	
+	if((-180 < angle - goal_angle < 0) || (0 < angle - goal_angle < 180)){
+		diff = angle - goal_angle;
+	}
+	else {
+		diff = angle - goal_angle + 2*PI;
+	}
+	
+	// choose path for each point pair
+	if (-10 < diff < 10){
+	float low_data.field1 = 0;
+        float low_data.field2 = 0;
+	float low_data.field2 = x0;
+	float low_data.field2 = y0;
+	float low_data.field2 = x;
+	float low_data.field2 = y;
+	}
+	else if(diff > 10){
+			float low_data.field1 = 1;
+                        float low_data.field2 = 30;
+	                float low_data.field2 = x0;
+	                float low_data.field2 = y0;
+	                float low_data.field2 = x;
+	                float low_data.field2 = y;
+	}
+	else (diff < -10){
+		float low_data.field1 = 2;
+                float low_data.field2 = -30;
+	        float low_data.field2 = x0;
+	        float low_data.field2 = y0;
+	        float low_data.field2 = x;
+	        float low_data.field2 = y;
+	}
+	
 
-	// setting low data value example
-	low_data.field1 = my_float_variable;
+/*	
+	case RSL
+	        eita = pi/2 - atan((y2-y1)/(x2-x1));
+	        gamma = atan(2*r/d);
+	        theta = eita - gamma + pi/2;
+		while phi < theta
+			make right turn
+			end while
+	        dsum = 0;
+	        while dsum < d
+			go straight
+			end while
+		while phi < phi2
+			make left turn
+			end while
+	case LSL
+		theta = pi/2 - atan((y2-y1)/(x2-x1));
+		while phi < theta
+			make left turn
+			end while
+	        dsum = 0;
+	        while dsum < d
+			go straight
+			end while
+		while phi < phi2
+			make left turn
+			end while
+	case LSR
+	        eita = pi/2 + atan((y2-y1)/(x2-x1));
+	        gamma = acos(2*r/d);
+	        theta = eita + gamma - pi/2;
+		while phi < theta
+			make right turn
+			end while
+	        dsum = 0;
+	        while dsum < d
+			go straight
+			end while
+		while phi < phi2
+			make left turn
+			end while
+*/				
 
 
 }
