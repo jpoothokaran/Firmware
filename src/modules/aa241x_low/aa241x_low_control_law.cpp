@@ -73,38 +73,58 @@ for each pair of points in output_points
    CL2 = (x2 + r*cos(phi), y2 - sin(phi));
 }
 */
-        float input_points[3][3] = ({
-		10, 19, 10;
-		300, 129, 10;
-		700, 310, 10;
-	});
+
+// for now, we do not use TSP, and just hard code three points in order
+// suppose we have 3 waypoints in the correct order, each point has three numbers: its x&y coordinates, and its radius required
+        float input_points[][3] = {
+		{10, 19, 10},
+		{300, 129, 10},
+		{700, 310, 10},
+	};
+// for this case we assume all points require radius of 10
         float goalRadius = 10;
+
+// predefine the cooridnates of the first goal
         x = input_points[0][0];
         y = input_points[0][1];
+
+
+// calculate how many points are given (calculate the number of columns)
+        int cols = sizeof input_points[0] / sizeof(int); // 3 cols in this case
+				   
+// distance is the euclidean distance between the plane position and the goal point
         float distance; 
+// create a variable to count for the number of points visited, initially 0 poinst are visited
         int visited = 0;
 
 /*
  * This loop executes at ~50Hz, but is not guaranteed to be 50Hz every time.
  */
-void low_loop((visited < length(input_points)) || (distance > goalRadius))
+
+// condition for the loop to stop running is the plane has visited all points and the distance is within the desired radius range 
+void low_loop((visited < cols) || (distance > goalRadius))
 {
         // check the distance between the plane and the first point
         distance = sqrt((x-x0)^2 + (y-y0)^2);
-        // ouput_points = tsp(input_points);
-        float Radius = r;
+        
+	// set the minimum turning radius
+        float Radius = 15;
+	// get the current plane orientation, and x, y coordinates
         float angle = yaw;
 	float x0 = position_N;
 	float y0 = -position_E;
+	
 	int case ; // case variable (case = 0 go straight, case = 1 left bank, case = 2 right bank)
-	float goal_angle = atan2 (x - x0, y - y0) * 180 / PI; //set the goal angle in degrees
+	float goal_angle = atan2 (x - x0, y - y0) * 180 / PI; //set the goal angle to the next goal point and convert it from raidans 
+	// into degrees
 
 	// getting high data value example
 	// float my_high_data = high_data.field1;
 	
+	// set the difference angle between the current orientation and our desired angle to the goal point
 	float diff;
 	
-	// compensate for the angle difference between the actual angle and desired angle
+	// make sure the difference angle is within -180 and 180 degrees
 	if((-180 < angle - goal_angle < 0) || (0 < angle - goal_angle < 180)){
 		diff = angle - goal_angle;
 	}
@@ -141,15 +161,18 @@ void low_loop((visited < length(input_points)) || (distance > goalRadius))
 	        float low_data.field2 = y;
 	}
 	
-	// check whether the plane reaches the radius range of a certain point, and if yes, then change the goal to the next point
+	// check whether the plane reaches the radius range of a certain goal point, and if yes, then change the goal to the next point
        	float x0 = position_N;
 	float y0 = -position_E;
         distance = sqrt((x-x0)^2 + (y-y0)^2);;
 	
+	// when the plane reaches the desired range of a goal point
         if (distance <= goalRadius) {
-		if (visited == length(input_points)){
+		// check if the plane has visited all points, if yes, then break the loop
+		if (visited == cols){
 			break
 		}
+		// if the plane has not visited all points, then head to the next point 
                 else{
                         visited += 1;
                         x = input_points[visited][0];
