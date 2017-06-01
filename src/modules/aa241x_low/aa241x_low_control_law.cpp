@@ -73,36 +73,23 @@ for each pair of points in output_points
    CL2 = (x2 + r*cos(phi), y2 - sin(phi));
 }
 */
+//Format that we'll receive
+float goal_N[5] = {-24,14,15,-44,2};
+float goal_E[5] = {14,3,8,-33,12};
+float goal_r[5] = {2,5,3,7,-1}; //-1 means point is not active
+//Convert from N and E to our x,y grid
+float goal_x=goal_N;
+float goal_y=-goal_E;
 
-// for now, we do not use TSP, and just hard code three points in order
-// suppose we have 3 waypoints in the correct order, each point has three numbers: its x&y coordinates, and its radius required
-        float input_points[][3] = {
-		{10, 19, 10},
-		{300, 129, 10},
-		{700, 310, 10},
-	};
-// for this case we assume all points require radius of 10
-        float goalRadius = 10;
-
-// predefine the cooridnates of the first goal
-        x = input_points[0][0];
-        y = input_points[0][1];
-
-
-// calculate how many points are given (calculate the number of columns)
-        int cols = sizeof input_points[0] / sizeof(int); // 3 cols in this case
-				   
-// distance is the euclidean distance between the plane position and the goal point
-        float distance; 
-// create a variable to count for the number of points visited, initially 0 poinst are visited
-        int visited = 0;
+// create array to monitor for the number of points visited, 0 is false (not visited) 1 is visited
+        int visited[5] = {0,0,0,0,0};
 
 /*
  * This loop executes at ~50Hz, but is not guaranteed to be 50Hz every time.
  */
 
 // condition for the loop to stop running is the plane has visited all points and the distance is within the desired radius range 
-void low_loop((visited < cols) || (distance > goalRadius))
+void low_loop()
 {
         // check the distance between the plane and the first point
         distance = sqrt((x-x0)^2 + (y-y0)^2);
