@@ -139,26 +139,26 @@ void low_loop((visited < cols) || (distance > goalRadius))
 	if (-10 < diff < 10){
 	float low_data.field1 = 0;
         float low_data.field2 = 0;
-	float low_data.field2 = x0;
-	float low_data.field2 = y0;
-	float low_data.field2 = x;
-	float low_data.field2 = y;
+	float low_data.field3 = x0;
+	float low_data.field4 = y0;
+	float low_data.field5 = x;
+	float low_data.field6 = y;
 	}
 	else if(diff > 10){
 			float low_data.field1 = 1;
                         float low_data.field2 = 30;
-	                float low_data.field2 = x0;
-	                float low_data.field2 = y0;
-	                float low_data.field2 = x;
-	                float low_data.field2 = y;
+	                float low_data.field3 = x0;
+	                float low_data.field4 = y0;
+	                float low_data.field5 = x;
+	                float low_data.field6 = y;
 	}
 	else (diff < -10){
 		float low_data.field1 = 2;
                 float low_data.field2 = -30;
-	        float low_data.field2 = x0;
-	        float low_data.field2 = y0;
-	        float low_data.field2 = x;
-	        float low_data.field2 = y;
+	        float low_data.field3 = x0;
+	        float low_data.field4 = y0;
+	        float low_data.field5 = x;
+	        float low_data.field6 = y;
 	}
 	
 	// check whether the plane reaches the radius range of a certain goal point, and if yes, then change the goal to the next point
@@ -179,50 +179,5 @@ void low_loop((visited < cols) || (distance > goalRadius))
 			y = input_points[visited][1];
 		}
 	}
-	
-
-/*	
-	case RSL
-	        eita = pi/2 - atan((y2-y1)/(x2-x1));
-	        gamma = atan(2*r/d);
-	        theta = eita - gamma + pi/2;
-		while phi < theta
-			make right turn
-			end while
-	        dsum = 0;
-	        while dsum < d
-			go straight
-			end while
-		while phi < phi2
-			make left turn
-			end while
-	case LSL
-		theta = pi/2 - atan((y2-y1)/(x2-x1));
-		while phi < theta
-			make left turn
-			end while
-	        dsum = 0;
-	        while dsum < d
-			go straight
-			end while
-		while phi < phi2
-			make left turn
-			end while
-	case LSR
-	        eita = pi/2 + atan((y2-y1)/(x2-x1));
-	        gamma = acos(2*r/d);
-	        theta = eita + gamma - pi/2;
-		while phi < theta
-			make right turn
-			end while
-	        dsum = 0;
-	        while dsum < d
-			go straight
-			end while
-		while phi < phi2
-			make left turn
-			end while
-*/				
-
 
 }
