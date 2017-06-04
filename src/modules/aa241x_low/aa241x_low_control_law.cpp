@@ -75,8 +75,8 @@ for each pair of points in output_points
 }
 */
 //Format that we'll receive
-float goal_N[5] = {-24,14,15,-44,2};
-float goal_E[5] = {14,3,8,-33,12};
+float goal_N[5] = {-2500,-2450,-2400,-44,2};
+float goal_E[5] = {1950,1950,2000,-33,12};
 float goal_r[5] = {2,5,3,-1,-1}; //-1 means point is not active
 //Convert from N and E to our x,y grid
 float goal_x=goal_N;
