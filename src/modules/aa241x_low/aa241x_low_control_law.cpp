@@ -104,12 +104,12 @@ void low_loop()
 	float y00 = -position_E;
         // check the distance and heading cost to each point
         // use point with lowest cost
-        float costs[5] = {100,100,100,100,100};
+        
         float mincost=10000.0f;
         int mincostind=-1;
 	float minangle=0.0f;
         for (int i = 0; a < 5; a = a + 1 ) {
-            if (goal_r != -1) {
+            if (goal_r[i] != -1) {
                 //Calculate cost of each
                 float distcost = sqrtf(powf(goal_x[i]-x00,2.0f)+powf(goal_y[i]-y00,2.0f));
                 float angletemp = atan2f(goal_y[i]-y00, goal_x[i]-x00,);
