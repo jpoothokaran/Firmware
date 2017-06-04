@@ -85,6 +85,12 @@ float goal_y=-goal_E;
 // create array to monitor for the number of points visited, 0 is false (not visited) 1 is visited
 int visited[5] = {0,0,0,0,0};
 
+float low_data.field1 = -2410.0f;
+float low_data.field2 = 2000.0f;
+float low_data.field3 = -2411.0f;
+float low_data.field4 = 2000.0f;
+float low_data.field5 = 0.0f; //heading to best next point
+
 /*
  * This loop executes at ~50Hz, but is not guaranteed to be 50Hz every time.
  */
@@ -121,11 +127,15 @@ void low_loop()
              }
         }
         //assign goal point to low field that high control law can use
-        float low_data.field1 = goal_x[i];
-	float low_data.field2 = goal_y[i];
-	float low_data.field3 = x00-(goal_x[i]-x00);
-	float low_data.field4 = y00-(goal_y[i]-y00);
-	float low_data.field5 = -minangle; //heading to best next point
+	//if there is a new target point, otherwise continue to use the first line found
+	//this should avoid drift and keep us following the same straight line to a point
+	if ((low_data.field1 != goal_x[mincostind]) && (low_data.field2 != goal_y[mincostind])) {
+        	float low_data.field1 = goal_x[mincostind];
+		float low_data.field2 = goal_y[mincostind];
+		float low_data.field3 = x00-(goal_x[mincostind]-x00);
+		float low_data.field4 = y00-(goal_y[mincostind]-y00);
+		float low_data.field5 = -minangle; //heading to best next point
+	}
         /*
 	// set the minimum turning radius
         float Radius = 15;
