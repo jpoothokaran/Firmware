@@ -76,13 +76,13 @@ for each pair of points in output_points
 //Format that we'll receive
 float goal_N[5] = {-24,14,15,-44,2};
 float goal_E[5] = {14,3,8,-33,12};
-float goal_r[5] = {2,5,3,7,-1}; //-1 means point is not active
+float goal_r[5] = {2,5,3,-1,-1}; //-1 means point is not active
 //Convert from N and E to our x,y grid
 float goal_x=goal_N;
 float goal_y=-goal_E;
 
 // create array to monitor for the number of points visited, 0 is false (not visited) 1 is visited
-        int visited[5] = {0,0,0,0,0};
+int visited[5] = {0,0,0,0,0};
 
 /*
  * This loop executes at ~50Hz, but is not guaranteed to be 50Hz every time.
@@ -91,15 +91,38 @@ float goal_y=-goal_E;
 // condition for the loop to stop running is the plane has visited all points and the distance is within the desired radius range 
 void low_loop()
 {
-        // check the distance between the plane and the first point
-        distance = sqrt((x-x0)^2 + (y-y0)^2);
-        
+	//Get current state of aircraft
+        float angle = -yaw;
+	float x00 = position_N;
+	float y00 = -position_E;
+        // check the distance and heading cost to each point
+        // use point with lowest cost
+        float costs[5] = {100,100,100,100,100};
+        float mincost=10000;
+        int mincostind=-1;
+        for (int i = 0; a < 5; a = a + 1 ) {
+            if (goal_r != -1) {
+                //Calculate cost of each
+                float distcost = sqrtf(powf(goal_x[i]-x00,2.0f)+powf(goal_y[i]-y00,2.0f));
+                float angletemp = atan2f(goal_y[i]-y00, goal_x[i]-x00,);
+                float anglecost = abs(angletemp - angle);
+                float cost = 100*anglecost + distcost;
+                if (cost < mincost) {
+                        mincost=cost;
+                        mincostind=i;
+                }
+                //Check if visited
+                if (distcost < goal_r[i]) {
+                        goal_r[i]=-1; //deactivates a visited goal
+                }
+             }
+        }
+        //assign goal point to low field that high control law can use
+        float low_data.field1 = goal_x[i];
+	float low_data.field2 = goal_y[i];
+        /*
 	// set the minimum turning radius
         float Radius = 15;
-	// get the current plane orientation, and x, y coordinates
-        float angle = yaw;
-	float x0 = position_N;
-	float y0 = -position_E;
 	
 	int case ; // case variable (case = 0 go straight, case = 1 left bank, case = 2 right bank)
 	float goal_angle = atan2 (x - x0, y - y0) * 180 / PI; //set the goal angle to the next goal point and convert it from raidans 
@@ -166,5 +189,9 @@ void low_loop()
 			y = input_points[visited][1];
 		}
 	}
+        */
+        
+        //check for visited checkpointts
+        
 
 }
