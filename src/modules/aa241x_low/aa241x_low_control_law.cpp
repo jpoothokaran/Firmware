@@ -120,6 +120,9 @@ void low_loop()
         //assign goal point to low field that high control law can use
         float low_data.field1 = goal_x[i];
 	float low_data.field2 = goal_y[i];
+	float low_data.field3 = x00-(goal_x[i]-x00);
+	float low_data.field4 = y00-(goal_y[i]-y00);
+	
         /*
 	// set the minimum turning radius
         float Radius = 15;
