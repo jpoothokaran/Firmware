@@ -46,6 +46,7 @@
 #include "aa241x_low_control_law.h"
 #include "aa241x_low_aux.h"
 #include<stdio.h>
+#include <math.h>
 #include<conio.h>
 #include<iostream>
 #include <queue>          // std::queue
@@ -98,18 +99,20 @@ void low_loop()
         // check the distance and heading cost to each point
         // use point with lowest cost
         float costs[5] = {100,100,100,100,100};
-        float mincost=10000;
+        float mincost=10000.0f;
         int mincostind=-1;
+	float minangle=0.0f;
         for (int i = 0; a < 5; a = a + 1 ) {
             if (goal_r != -1) {
                 //Calculate cost of each
                 float distcost = sqrtf(powf(goal_x[i]-x00,2.0f)+powf(goal_y[i]-y00,2.0f));
                 float angletemp = atan2f(goal_y[i]-y00, goal_x[i]-x00,);
                 float anglecost = abs(angletemp - angle);
-                float cost = 100*anglecost + distcost;
+                float cost = 100.0f*anglecost + distcost;
                 if (cost < mincost) {
                         mincost=cost;
                         mincostind=i;
+			minangle=angletemp;
                 }
                 //Check if visited
                 if (distcost < goal_r[i]) {
@@ -122,7 +125,7 @@ void low_loop()
 	float low_data.field2 = goal_y[i];
 	float low_data.field3 = x00-(goal_x[i]-x00);
 	float low_data.field4 = y00-(goal_y[i]-y00);
-	
+	float low_data.field5 = -minangle; //heading to best next point
         /*
 	// set the minimum turning radius
         float Radius = 15;
