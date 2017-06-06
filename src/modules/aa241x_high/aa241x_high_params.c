@@ -255,6 +255,10 @@ PARAM_DEFINE_INT32(AAH_CASE, 0);
 //rollgain
 PARAM_DEFINE_FLOAT(AAH_PROPROLLGAIN, 0.004f);
 
+//trim params
+PARAM_DEFINE_FLOAT(AAH_TRIMPITCH, 0.0f);
+PARAM_DEFINE_FLOAT(AAH_TRIMVEL, 16.0f);
+
 
 int aah_parameters_init(struct aah_param_handles *h)
 {
@@ -274,6 +278,8 @@ int aah_parameters_init(struct aah_param_handles *h)
     h->trim_elevator		= param_find("AAH_TRIMELEV");
     h->trim_aileron			= param_find("AAH_TRIMAILERON");
     h->trim_rudder			= param_find("AAH_TRIMRUDDER");
+    h->trim_pitch			= param_find("AAH_TRIMPITCH");
+    h->trim_velocity		= param_find("AAH_TRIMVEL");
     
     // Command parameters
     h->cmd_u                = param_find("AAH_CMDU");
@@ -316,6 +322,8 @@ int aah_parameters_update(const struct aah_param_handles *h, struct aah_params *
     param_get(h->trim_elevator, &(p->trim_elevator));
     param_get(h->trim_aileron, &(p->trim_aileron));
     param_get(h->trim_rudder, &(p->trim_rudder));
+    param_get(h->trim_pitch, &(p->trim_pitch));
+    param_get(h->trim_velocity, &(p->trim_velocity));
     
     // Command parameters
     param_get(h->cmd_u, &(p->cmd_u));
