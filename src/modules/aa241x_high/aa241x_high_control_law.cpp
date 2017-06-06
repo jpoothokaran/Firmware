@@ -69,11 +69,11 @@ float beta_command;
 float phi_command;
 float psi_command;
 float heading_command;
-float servo_throttle_initial,
-float servo_elevator_initial,
-float servo_rudder_initial,
-float servo_aileron_initial,
-float pitch_command,
+float servo_throttle_initial;
+float servo_elevator_initial;
+float servo_rudder_initial;
+float servo_aileron_initial;
+float pitch_command;
 float yaw_temp;
 		
 
@@ -390,7 +390,7 @@ void flight_control() {
         y11=low_data.field2;
         x0=low_data.field3;
         y00=low_data.field4;
-        psi0=low_data.field5; //yaw (heading) associated with line from 0 to 1
+        float psi0=low_data.field5; //yaw (heading) associated with line from 0 to 1
         b = sqrtf(powf(x1-x,2.0f)+powf(y11-y,2.0f)); //triangle side length
 	    c = sqrtf(powf(x-x0,2.0f)+powf(y-y00,2.0f)); //triangle side length
 	    float s = (a+b+c)/2.0f; //half perimeter used for herons formula for area
