@@ -442,7 +442,7 @@ void flight_control() {
         //not wrapping on roll because never expect to get close to pi or -pi
         //put a cap on total bank angle
         float phi_total = phi_command + aah_parameters.cmd_phi;
-        float bank_limit = deg2rad * 45.0f;
+        float bank_limit = deg2rad * aah_parameters.banklimit;
         if (phi_total < -bank_limit) {
             phi_total = -bank_limit;
         }
@@ -536,14 +536,14 @@ void flight_control() {
     high_data.field7 = servo_aileron_initial;
     high_data.field8 = servo_elevator_initial;
     high_data.field9 = servo_throttle_initial;
-    high_data.field10 = servo_rudder_initial;
+    high_data.field10 = psi_command;
     // intermediate commands
     high_data.field11 = pitch_command;
     high_data.field12 = yaw_temp;
     high_data.field13 = phi_command;
     high_data.field14 = u_command;
     high_data.field15 = alt_command;
-    high_data.field16 = heading_command;
+    high_data.field16 = aah_parameters.banklimit;
 	
 	
 	
