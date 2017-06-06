@@ -45,11 +45,11 @@
 // include header file
 #include "aa241x_low_control_law.h"
 #include "aa241x_low_aux.h"
-#include<stdio.h>
+#include <stdio.h>
 #include <math.h>
-#include<conio.h>
-#include<iostream>
-#include <queue>          // std::queue
+//#include <conio.h>
+//#include <iostream>
+//#include <queue>          // std::queue
 //using namespace std;
 
 #include <uORB/uORB.h>
@@ -77,19 +77,20 @@ for each pair of points in output_points
 //Format that we'll receive
 float goal_N[5] = {-2500,-2450,-2400,-44,2};
 float goal_E[5] = {1950,1950,2000,-33,12};
-float goal_r[5] = {2,5,3,-1,-1}; //-1 means point is not active
+float goal_r[5] = {10,10,8,-1,-1}; //-1 means point is not active
 //Convert from N and E to our x,y grid
-float goal_x=goal_N;
-float goal_y=-goal_E;
+
+float goal_x[5] = {goal_N[0],goal_N[1],goal_N[2],goal_N[3],goal_N[4]};// = goal_N;
+float goal_y[5] = {-goal_E[0],-goal_E[1],-goal_E[2],-goal_E[3],-goal_E[4]};// = -goal_E;
 
 // create array to monitor for the number of points visited, 0 is false (not visited) 1 is visited
 int visited[5] = {0,0,0,0,0};
 
-float low_data.field1 = -2410.0f;
-float low_data.field2 = 2000.0f;
-float low_data.field3 = -2411.0f;
-float low_data.field4 = 2000.0f;
-float low_data.field5 = 0.0f; //heading to best next point
+// low_data.field1 = -2410.0f;
+// low_data.field2 = 2000.0f;
+// low_data.field3 = -2411.0f;
+// low_data.field4 = 2000.0f;
+// low_data.field5 = 0.0f; //heading to best next point
 
 /*
  * This loop executes at ~50Hz, but is not guaranteed to be 50Hz every time.
@@ -104,21 +105,21 @@ void low_loop()
 	float y00 = -position_E;
         // check the distance and heading cost to each point
         // use point with lowest cost
-        
+        //float costs[5] = {100,100,100,100,100};
         float mincost=10000.0f;
         int mincostind=-1;
 	float minangle=0.0f;
-        for (int i = 0; a < 5; a = a + 1 ) {
-            if (goal_r[i] != -1) {
+        for (int i = 0; i < 5; i = i + 1 ) {
+            if (goal_r[i] < 0) {
                 //Calculate cost of each
                 float distcost = sqrtf(powf(goal_x[i]-x00,2.0f)+powf(goal_y[i]-y00,2.0f));
-                float angletemp = atan2f(goal_y[i]-y00, goal_x[i]-x00,);
+                float angletemp = atan2f(goal_y[i]-y00, goal_x[i]-x00);
                 float anglecost = abs(angletemp - angle);
                 float cost = 100.0f*anglecost + distcost;
                 if (cost < mincost) {
                         mincost=cost;
                         mincostind=i;
-			minangle=angletemp;
+						minangle=angletemp;
                 }
                 //Check if visited
                 if (distcost < goal_r[i]) {
@@ -129,12 +130,13 @@ void low_loop()
         //assign goal point to low field that high control law can use
 	//if there is a new target point, otherwise continue to use the first line found
 	//this should avoid drift and keep us following the same straight line to a point
-	if ((low_data.field1 != goal_x[mincostind]) && (low_data.field2 != goal_y[mincostind])) {
-        	float low_data.field1 = goal_x[mincostind];
-		float low_data.field2 = goal_y[mincostind];
-		float low_data.field3 = x00-(goal_x[mincostind]-x00);
-		float low_data.field4 = y00-(goal_y[mincostind]-y00);
-		float low_data.field5 = -minangle; //heading to best next point
+	if ((abs(low_data.field1 - goal_x[mincostind]) > 1.0) || (abs(low_data.field2 - goal_y[mincostind]) > 1.0)) 
+	{
+        low_data.field1 = goal_x[mincostind];
+		low_data.field2 = goal_y[mincostind];
+		low_data.field3 = x00-(goal_x[mincostind]-x00);
+		low_data.field4 = y00-(goal_y[mincostind]-y00);
+		low_data.field5 = -minangle; //heading to best next point
 	}
         /*
 	// set the minimum turning radius
@@ -143,7 +145,6 @@ void low_loop()
 	int case ; // case variable (case = 0 go straight, case = 1 left bank, case = 2 right bank)
 	float goal_angle = atan2 (x - x0, y - y0) * 180 / PI; //set the goal angle to the next goal point and convert it from raidans 
 	// into degrees
-
 	// getting high data value example
 	// float my_high_data = high_data.field1;
 	
@@ -163,28 +164,28 @@ void low_loop()
 	
 	// determine which mode to take, straight line, left turn or right turn, and output corresponding parameters to high control law
 	if (-10 < diff < 10){
-	float low_data.field1 = 0;
-        float low_data.field2 = 0;
-	float low_data.field3 = x0;
-	float low_data.field4 = y0;
-	float low_data.field5 = x;
-	float low_data.field6 = y;
+	low_data.field1 = 0;
+        low_data.field2 = 0;
+	low_data.field3 = x0;
+	low_data.field4 = y0;
+	low_data.field5 = x;
+	low_data.field6 = y;
 	}
 	else if(diff > 10){
-			float low_data.field1 = 1;
-                        float low_data.field2 = 30;
-	                float low_data.field3 = x0;
-	                float low_data.field4 = y0;
-	                float low_data.field5 = x;
-	                float low_data.field6 = y;
+			low_data.field1 = 1;
+                        low_data.field2 = 30;
+	                low_data.field3 = x0;
+	                low_data.field4 = y0;
+	                low_data.field5 = x;
+	                low_data.field6 = y;
 	}
 	else (diff < -10){
-		float low_data.field1 = 2;
-                float low_data.field2 = -30;
-	        float low_data.field3 = x0;
-	        float low_data.field4 = y0;
-	        float low_data.field5 = x;
-	        float low_data.field6 = y;
+		low_data.field1 = 2;
+                low_data.field2 = -30;
+	        low_data.field3 = x0;
+	        low_data.field4 = y0;
+	        low_data.field5 = x;
+	        low_data.field6 = y;
 	}
 	
 	// check whether the plane reaches the radius range of a certain goal point, and if yes, then change the goal to the next point
