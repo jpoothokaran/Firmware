@@ -421,8 +421,17 @@ void flight_control() {
         // pitch_desired is the initial (aka trim) pitch to fly at so we want to address deviations from that condition
         
         psi_command = aah_parameters.gain_tracking*(d_command - d); // tracking gain (y in matlab)
-		//wrap to pi on heading going in in case commanded heading is -179 deg and measured is 179, difference is -358, which wraps to 2
-		yaw_temp = psi_command + psi0 - yaw; //if on line psi_command is 0, so want to match initial yaw
+	//cap the psi_command, if wayyy off line psi command will be beyond 2*pi and screw up wrapping to pi
+        //Assume that limiting to 60degrees will be sufficient enough to allow us to turn hard without wrapping when far from line
+        float psi_limit = 60.0f * deg2rad;
+        if (psi_command > psi_limit) {
+                psi_command = psi_limit;
+        }
+        else if (psi_command < -psi_limit) {
+                psi_command = -psi_limit;
+        }
+        //wrap to pi on heading going in in case commanded heading is -179 deg and measured is 179, difference is -358, which wraps to 2
+	yaw_temp = psi_command + psi0 - yaw; //if on line psi_command is 0, so want to match initial yaw
         if (yaw_temp > PI) {
             yaw_temp = yaw_temp - 2.0f * PI;
         }
@@ -430,7 +439,7 @@ void flight_control() {
             yaw_temp = yaw_temp + 2.0f * PI;
         }
         phi_command = aah_parameters.gain_psi*(yaw_temp);
-		//not wrapping on roll because never expect to get close to pi or -pi
+        //not wrapping on roll because never expect to get close to pi or -pi
         //put a cap on total bank angle
         float phi_total = phi_command + aah_parameters.cmd_phi;
         float bank_limit = deg2rad * 45.0f;
