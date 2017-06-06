@@ -61,6 +61,7 @@ float y11;
 float a;
 float b;
 float c;
+float d;
 float sign_convention;
 float roll_command;
 float u_command;
@@ -151,7 +152,7 @@ void flight_control() {
 		b = sqrtf(powf(x1-x,2.0f)+powf(y11-y,2.0f)); //triangle side length
 		c = sqrtf(powf(x-x0,2.0f)+powf(y-y00,2.0f)); //triangle side length
 		float s = (a+b+c)/2.0f; //half perimeter used for herons formula for area
-        float d = 2*sqrtf(s*(s-a)*(s-b)*(s-c))/a; //perpendicular distance off line (y in matlab code)
+        d = 2*sqrtf(s*(s-a)*(s-b)*(s-c))/a; //perpendicular distance off line (y in matlab code)
 		//determine whether currently to the right or left of line, right is positive
 		//Set up desired line vector rel to x0,y00
 		float A_x = x1-x0;
@@ -206,7 +207,7 @@ void flight_control() {
 		b = sqrtf(powf(x1-x,2.0f)+powf(y11-y,2.0f)); //triangle side length
 		c = sqrtf(powf(x-x0,2.0f)+powf(y-y00,2.0f)); //triangle side length
 		float s = (a+b+c)/2.0f; //half perimeter used for herons formula for area
-        float d = 2*sqrtf(s*(s-a)*(s-b)*(s-c))/a; //perpendicular distance off line (y in matlab code)
+        d = 2*sqrtf(s*(s-a)*(s-b)*(s-c))/a; //perpendicular distance off line (y in matlab code)
 		//determine whether currently to the right or left of line, right is positive
 		//Set up desired line vector rel to x0,y00
 		float A_x = x1-x0;
@@ -301,7 +302,7 @@ void flight_control() {
 		b = sqrtf(powf(x1-x,2.0f)+powf(y11-y,2.0f)); //triangle side length
 		c = sqrtf(powf(x-x0,2.0f)+powf(y-y00,2.0f)); //triangle side length
 		float s = (a+b+c)/2.0f; //half perimeter used for herons formula for area
-        float d = 2*sqrtf(s*(s-a)*(s-b)*(s-c))/a; //perpendicular distance off line (y in matlab code)
+        d = 2*sqrtf(s*(s-a)*(s-b)*(s-c))/a; //perpendicular distance off line (y in matlab code)
 		//determine whether currently to the right or left of line, right is positive
 		//Set up desired line vector rel to x0,y00
 		float A_x = x1-x0;
@@ -394,7 +395,7 @@ void flight_control() {
         b = sqrtf(powf(x1-x,2.0f)+powf(y11-y,2.0f)); //triangle side length
 	    c = sqrtf(powf(x-x0,2.0f)+powf(y-y00,2.0f)); //triangle side length
 	    float s = (a+b+c)/2.0f; //half perimeter used for herons formula for area
-        float d = 2*sqrtf(s*(s-a)*(s-b)*(s-c))/a; //perpendicular distance off line (y in matlab code)
+        d = 2*sqrtf(s*(s-a)*(s-b)*(s-c))/a; //perpendicular distance off line (y in matlab code)
 	    //determine whether currently to the right or left of line, right is positive
 	    //Set up desired line vector rel to x0,y00
 	    float A_x = x1-x0;
@@ -423,7 +424,7 @@ void flight_control() {
         psi_command = aah_parameters.gain_tracking*(d_command - d); // tracking gain (y in matlab)
 	//cap the psi_command, if wayyy off line psi command will be beyond 2*pi and screw up wrapping to pi
         //Assume that limiting to 60degrees will be sufficient enough to allow us to turn hard without wrapping when far from line
-        float psi_limit = 60.0f * deg2rad;
+        float psi_limit = 30.0f * deg2rad;
         if (psi_command > psi_limit) {
                 psi_command = psi_limit;
         }
@@ -431,14 +432,14 @@ void flight_control() {
                 psi_command = -psi_limit;
         }
         //wrap to pi on heading going in in case commanded heading is -179 deg and measured is 179, difference is -358, which wraps to 2
-	yaw_temp = psi_command + psi0 - yaw; //if on line psi_command is 0, so want to match initial yaw
+	    yaw_temp =  psi0 - yaw; //if on line psi_command is 0, so want to match initial yaw
         if (yaw_temp > PI) {
             yaw_temp = yaw_temp - 2.0f * PI;
         }
         else if (yaw_temp < -PI) {
             yaw_temp = yaw_temp + 2.0f * PI;
         }
-        phi_command = aah_parameters.gain_psi*(yaw_temp);
+        phi_command = aah_parameters.gain_psi*(psi_command + yaw_temp);
         //not wrapping on roll because never expect to get close to pi or -pi
         //put a cap on total bank angle
         float phi_total = phi_command + aah_parameters.cmd_phi;
