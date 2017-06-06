@@ -410,14 +410,14 @@ void flight_control() {
         //commands
         float d_command = 0.0f; //obviously stay on line
         beta_command = 0.0f; //don't want sideslip
-        u_command = aah_parameters.cmd_u; //give velocity to q ground control
+        u_command = aah_parameters.trim_velocity; //give velocity to q ground control
         alt_command = aah_parameters.cmd_alt; //give altitude through q ground control
         
         //Execute proportional control
         float delta_throttle = aah_parameters.gain_throttle*(u_command - speed_body_u);
         float alt_measured = -position_D_gps;
         pitch_command = aah_parameters.gain_altitude*(alt_command - alt_measured); //Should be a radian output
-        float delta_elevator = aah_parameters.gain_pitch*(pitch_command + pitch_desired - pitch); //Should be in rads
+        float delta_elevator = aah_parameters.gain_pitch*(pitch_command + aah_parameters.trim_pitch - pitch); //Should be in rads
         // pitch_desired is the initial (aka trim) pitch to fly at so we want to address deviations from that condition
         
         psi_command = aah_parameters.gain_tracking*(d_command - d); // tracking gain (y in matlab)
@@ -454,10 +454,10 @@ void flight_control() {
         float delta_rudder = aah_parameters.gain_beta*(beta_command - speed_body_v/speed_body_u); //Should be in rads, small angle approx of beta
         
         // Update servo outputs (remember our control law is deviation from trim so we sum our perturbational change delta)
-        throttle_servo_out = servo_throttle_initial + delta_throttle;
-        pitch_servo_out = servo_elevator_initial + delta_elevator / max_elevator_deflection;
-        roll_servo_out = servo_rudder_initial + delta_aileron / max_aileron_deflection;
-        yaw_servo_out = servo_aileron_initial + delta_rudder / max_rudder_deflection;
+        throttle_servo_out = aah_parameters.trim_throttle + delta_throttle;
+        pitch_servo_out = aah_parameters.trim_elevator + delta_elevator / max_elevator_deflection;
+        roll_servo_out = aah_parameters.trim_aileron + delta_aileron / max_aileron_deflection;
+        yaw_servo_out = aah_parameters.trim_rudder + delta_rudder / max_rudder_deflection;
     }
     
     // ###################################################################################################################
@@ -527,7 +527,7 @@ void flight_control() {
     // ############################################################################################################
     // Store data to write to pixhawk output, will help analyze our control low easier
     //initial states
-    high_data.field1 = roll_desired;
+    high_data.field1 = d;
     high_data.field2 = pitch_desired;
     high_data.field3 = yaw_desired;
     high_data.field4 = throttle_desired;
