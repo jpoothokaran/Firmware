@@ -70,6 +70,8 @@ extern "C" {
         float trim_pitch;
         float trim_velocity;
         
+        float banklimit;
+        
         // Commands
         float cmd_u;
         float cmd_alt;
@@ -117,6 +119,8 @@ extern "C" {
         param_t trim_rudder;
         param_t trim_pitch;
         param_t trim_velocity;
+        
+        param_t banklimit;
         
         // Commands
         param_t cmd_u;
