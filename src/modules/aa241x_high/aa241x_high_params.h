@@ -67,6 +67,8 @@ extern "C" {
         float trim_elevator;
         float trim_aileron;
         float trim_rudder;
+        float trim_pitch;
+        float trim_velocity;
         
         // Commands
         float cmd_u;
@@ -113,6 +115,8 @@ extern "C" {
         param_t trim_elevator;
         param_t trim_aileron;
         param_t trim_rudder;
+        param_t trim_pitch;
+        param_t trim_velocity;
         
         // Commands
         param_t cmd_u;
