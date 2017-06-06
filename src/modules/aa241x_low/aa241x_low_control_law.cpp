@@ -110,7 +110,7 @@ void low_loop()
         int mincostind=-1;
 	float minangle=0.0f;
         for (int i = 0; i < 5; i = i + 1 ) {
-            if (goal_r[i] < 0) {
+            if (goal_r[i] > 0) {
                 //Calculate cost of each
                 float distcost = sqrtf(powf(goal_x[i]-x00,2.0f)+powf(goal_y[i]-y00,2.0f));
                 float angletemp = atan2f(goal_y[i]-y00, goal_x[i]-x00);
@@ -119,7 +119,7 @@ void low_loop()
                 if (cost < mincost) {
                         mincost=cost;
                         mincostind=i;
-						minangle=angletemp;
+			minangle=angletemp;
                 }
                 //Check if visited
                 if (distcost < goal_r[i]) {
@@ -130,9 +130,15 @@ void low_loop()
         //assign goal point to low field that high control law can use
 	//if there is a new target point, otherwise continue to use the first line found
 	//this should avoid drift and keep us following the same straight line to a point
-	if ((abs(low_data.field1 - goal_x[mincostind]) > 1.0) || (abs(low_data.field2 - goal_y[mincostind]) > 1.0)) 
-	{
-        low_data.field1 = goal_x[mincostind];
+        if (mincostind == -1) { //if no suitable goal is found idle
+                low_data.field1 = goal_x[mincostind];
+                low_data.field2 = goal_y[mincostind];
+		low_data.field3 = x00-(goal_x[mincostind]-x00);
+		low_data.field4 = y00-(goal_y[mincostind]-y00);
+		low_data.field5 = -minangle;
+        }
+	else if ((abs(low_data.field1 - goal_x[mincostind]) > 1.0) || (abs(low_data.field2 - goal_y[mincostind]) > 1.0)) { //as long as new goal is different from old goal update
+                low_data.field1 = goal_x[mincostind];
 		low_data.field2 = goal_y[mincostind];
 		low_data.field3 = x00-(goal_x[mincostind]-x00);
 		low_data.field4 = y00-(goal_y[mincostind]-y00);
