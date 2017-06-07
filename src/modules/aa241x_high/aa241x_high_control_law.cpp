@@ -392,21 +392,22 @@ void flight_control() {
         x0=low_data.field3;
         y00=low_data.field4;
         float psi0=low_data.field5; //yaw (heading) associated with line from 0 to 1
+        a = sqrtf(powf(x1-x0,2.0f)+powf(y11-y00,2.0f));
         b = sqrtf(powf(x1-x,2.0f)+powf(y11-y,2.0f)); //triangle side length
-	    c = sqrtf(powf(x-x0,2.0f)+powf(y-y00,2.0f)); //triangle side length
-	    float s = (a+b+c)/2.0f; //half perimeter used for herons formula for area
+	c = sqrtf(powf(x-x0,2.0f)+powf(y-y00,2.0f)); //triangle side length
+	float s = (a+b+c)/2.0f; //half perimeter used for herons formula for area
         d = 2*sqrtf(s*(s-a)*(s-b)*(s-c))/a; //perpendicular distance off line (y in matlab code)
-	    //determine whether currently to the right or left of line, right is positive
-	    //Set up desired line vector rel to x0,y00
-	    float A_x = x1-x0;
-	    float A_y = y11-y00;
-	    //Set up current position rel to x0,y00 vector
-	    float B_x = x-x0;
-	    float B_y = y-y00;
-	    float d_sign = A_x * (-B_y) + A_y * B_x; //if d_sign>0 then B points to right of A, else if d_sign<0 B is left of A
-	    if (d_sign < 0){
-		    d = -d;
-	    } //else d, which always starts positive will just be positive or zero, no need to switch sign by muliplying
+	//determine whether currently to the right or left of line, right is positive
+	//Set up desired line vector rel to x0,y00
+	float A_x = x1-x0;
+	float A_y = y11-y00;
+	//Set up current position rel to x0,y00 vector
+	float B_x = x-x0;
+	float B_y = y-y00;
+	float d_sign = A_x * (-B_y) + A_y * B_x; //if d_sign>0 then B points to right of A, else if d_sign<0 B is left of A
+	if (d_sign < 0){
+	        d = -d;
+        } //else d, which always starts positive will just be positive or zero, no need to switch sign by muliplying
         
         //commands
         float d_command = 0.0f; //obviously stay on line
