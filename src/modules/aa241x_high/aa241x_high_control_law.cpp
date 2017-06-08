@@ -424,8 +424,8 @@ void flight_control() {
         
         psi_command = aah_parameters.gain_tracking*(d_command - d); // tracking gain (y in matlab)
 	//cap the psi_command, if wayyy off line psi command will be beyond 2*pi and screw up wrapping to pi
-        //Assume that limiting to 60degrees will be sufficient enough to allow us to turn hard without wrapping when far from line
-        float psi_limit = 30.0f * deg2rad;
+        //Assume that limiting to n degrees will be sufficient enough to allow us to turn hard without wrapping when far from line
+        float psi_limit = aah_parameters.approach_angle * deg2rad;
         if (psi_command > psi_limit) {
                 psi_command = psi_limit;
         }
