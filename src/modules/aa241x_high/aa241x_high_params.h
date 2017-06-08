@@ -71,6 +71,7 @@ extern "C" {
         float trim_velocity;
         
         float banklimit;
+        float approach_angle;
         
         // Commands
         float cmd_u;
@@ -121,6 +122,7 @@ extern "C" {
         param_t trim_velocity;
         
         param_t banklimit;
+        param_t approach_angle;
         
         // Commands
         param_t cmd_u;
