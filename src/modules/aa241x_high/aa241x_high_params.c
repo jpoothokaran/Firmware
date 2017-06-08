@@ -259,6 +259,7 @@ PARAM_DEFINE_FLOAT(AAH_PROPROLLGAIN, 0.004f);
 PARAM_DEFINE_FLOAT(AAH_TRIMPITCH, 0.0f);
 PARAM_DEFINE_FLOAT(AAH_TRIMVEL, 16.0f);
 PARAM_DEFINE_FLOAT(AAH_BANKLIMIT, 45.0f);
+PARAM_DEFINE_FLOAT(AAH_APROCHANG, 45.0F);
 
 int aah_parameters_init(struct aah_param_handles *h)
 {
@@ -282,6 +283,7 @@ int aah_parameters_init(struct aah_param_handles *h)
     h->trim_velocity		= param_find("AAH_TRIMVEL");
     
     h->banklimit            = param_find("AAH_BANKLIMIT");
+    h->approach_angle       = param_find("AAH_APROCHANG");
     
     // Command parameters
     h->cmd_u                = param_find("AAH_CMDU");
@@ -328,6 +330,7 @@ int aah_parameters_update(const struct aah_param_handles *h, struct aah_params *
     param_get(h->trim_velocity, &(p->trim_velocity));
     
     param_get(h->banklimit, &(p->banklimit));
+    param_get(h->approach_angle, &(p->approach_angle));
     
     // Command parameters
     param_get(h->cmd_u, &(p->cmd_u));
