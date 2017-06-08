@@ -97,10 +97,22 @@ float previous_time = 0.0f;
 /*
  * This loop executes at ~50Hz, but is not guaranteed to be 50Hz every time.
  */
-
+int current_phase = 0;
 // condition for the loop to stop running is the plane has visited all points and the distance is within the desired radius range 
 void low_loop()
 {
+	/*
+	//Getting this prepared for actual mission formulation
+	//
+	//only need to refresh goal x,y, and r if in a new mission mode
+	if (current_phase != phase_num) {
+		current_phase=phase_num;
+		goal_x = {plume_N[0],plume_N[1],plume_N[2],plume_N[3],plume_N[4]};
+		goal_y = {-plume_E[0],-plume_E[1],-plume_E[2],-plume_E[3],-plume_E[4]};
+		goal_r = {plume_radius[0],plume_radius[1],plume_radius[2],plume_radius[3],plume_radius[4]};
+	}
+	
+	*/
 	//Get current state of aircraft
         float angle = -yaw;
 	float x00 = position_N;
@@ -135,12 +147,12 @@ void low_loop()
         if (mincostind == -1) { //if no suitable goal is found idle
                 // low_data.field1 = goal_x[mincostind];
 //                 low_data.field2 = goal_y[mincostind];
-			low_data.field1 = -2507.0;
-			low_data.field2 = -1905.0;
+			low_data.field1 = 25;
+			low_data.field2 = 50;
 		//low_data.field3 = x00-(goal_x[mincostind]-x00);
 		//low_data.field4 = y00-(goal_y[mincostind]-y00);
-			low_data.field3 = -2425.0;
-			low_data.field4 = -1905.0;
+			low_data.field3 = -25;
+			low_data.field4 = 50;
 			low_data.field5 = 0;
 		//low_data.field5 = -minangle;
         }
@@ -161,5 +173,13 @@ void low_loop()
 		previous_time = hrt_absolute_time(); //time of most recent update to line
 	}
         //hrt_absolute_time() - previous_loop_timestamp > 500000.0f) { // Run if more than 0.5 seconds have passes since last loop,
-
+	//leave low data fields 6-16 to monitor other things
+	low_data.field6 = current_phase;
+	low_data.field7 = phase_num;
+	low_data.field8 = mincostind;
+	low_data.field9 = goal_r[0];
+	low_data.field10 = goal_r[1];
+	low_data.field11 = goal_r[2];
+	low_data.field12 = goal_r[3];
+	low_data.field13 = goal_r[4];
 }
