@@ -75,9 +75,9 @@ for each pair of points in output_points
 }
 */
 //Format that we'll receive
-float goal_N[5] = {-2500,-2450,-2400,-44,2};
-float goal_E[5] = {1950,1950,2000,-33,12};
-float goal_r[5] = {10,10,8,-1,-1}; //-1 means point is not active
+float goal_N[5] = {-2540,-2450,-2400,-2425,2};
+float goal_E[5] = {1900,1900,1950,1930,12};
+float goal_r[5] = {10,20,8,20,-1}; //-1 means point is not active
 //Convert from N and E to our x,y grid
 
 float goal_x[5] = {goal_N[0],goal_N[1],goal_N[2],goal_N[3],goal_N[4]};// = goal_N;
@@ -119,7 +119,7 @@ void low_loop()
                 if (cost < mincost) {
                         mincost=cost;
                         mincostind=i;
-			minangle=angletemp;
+			minangle=angletemp;	
                 }
                 //Check if visited
                 if (distcost < goal_r[i]) {
@@ -131,11 +131,16 @@ void low_loop()
 	//if there is a new target point, otherwise continue to use the first line found
 	//this should avoid drift and keep us following the same straight line to a point
         if (mincostind == -1) { //if no suitable goal is found idle
-                low_data.field1 = goal_x[mincostind];
-                low_data.field2 = goal_y[mincostind];
-		low_data.field3 = x00-(goal_x[mincostind]-x00);
-		low_data.field4 = y00-(goal_y[mincostind]-y00);
-		low_data.field5 = -minangle;
+                // low_data.field1 = goal_x[mincostind];
+//                 low_data.field2 = goal_y[mincostind];
+			low_data.field1 = -2507.0;
+			low_data.field2 = -1905.0;
+		//low_data.field3 = x00-(goal_x[mincostind]-x00);
+		//low_data.field4 = y00-(goal_y[mincostind]-y00);
+			low_data.field3 = -2425.0;
+			low_data.field4 = -1905.0;
+			low_data.field5 = 0;
+		//low_data.field5 = -minangle;
         }
 	else if ((abs(low_data.field1 - goal_x[mincostind]) > 1.0) || (abs(low_data.field2 - goal_y[mincostind]) > 1.0)) { //as long as new goal is different from old goal update
                 low_data.field1 = goal_x[mincostind];
