@@ -86,6 +86,8 @@ float goal_y[5] = {-goal_E[0],-goal_E[1],-goal_E[2],-goal_E[3],-goal_E[4]};// = 
 // create array to monitor for the number of points visited, 0 is false (not visited) 1 is visited
 int visited[5] = {0,0,0,0,0};
 
+float previous_time = 0.0f;
+
 // low_data.field1 = -2410.0f;
 // low_data.field2 = 2000.0f;
 // low_data.field3 = -2411.0f;
@@ -148,78 +150,16 @@ void low_loop()
 		low_data.field3 = x00-(goal_x[mincostind]-x00);
 		low_data.field4 = y00-(goal_y[mincostind]-y00);
 		low_data.field5 = -minangle; //heading to best next point
+		previous_time = hrt_absolute_time(); //time of most recent update to line
 	}
-        /*
-	// set the minimum turning radius
-        float Radius = 15;
-	
-	int case ; // case variable (case = 0 go straight, case = 1 left bank, case = 2 right bank)
-	float goal_angle = atan2 (x - x0, y - y0) * 180 / PI; //set the goal angle to the next goal point and convert it from raidans 
-	// into degrees
-	// getting high data value example
-	// float my_high_data = high_data.field1;
-	
-	// set the difference angle between the current orientation and our desired angle to the goal point
-	float diff;
-	
-	// make sure the difference angle is within -180 and 180 degrees
-	if((-180 < angle - goal_angle < 0) || (0 < angle - goal_angle < 180)){
-		diff = angle - goal_angle;
+	else if (hrt_absolute_time() - previous_time > 2500000.0f) { //get new line if following old one too long (2 secs)
+                low_data.field1 = goal_x[mincostind];
+		low_data.field2 = goal_y[mincostind];
+		low_data.field3 = x00-(goal_x[mincostind]-x00);
+		low_data.field4 = y00-(goal_y[mincostind]-y00);
+		low_data.field5 = -minangle; //heading to best next point
+		previous_time = hrt_absolute_time(); //time of most recent update to line
 	}
-	else if (-360 < angle - goal_angle <= -180){
-		diff = angle - goal_angle + 360;
-	}
-	else {
-		diff = angle - goal_angle - 360;
-	}
-	
-	// determine which mode to take, straight line, left turn or right turn, and output corresponding parameters to high control law
-	if (-10 < diff < 10){
-	low_data.field1 = 0;
-        low_data.field2 = 0;
-	low_data.field3 = x0;
-	low_data.field4 = y0;
-	low_data.field5 = x;
-	low_data.field6 = y;
-	}
-	else if(diff > 10){
-			low_data.field1 = 1;
-                        low_data.field2 = 30;
-	                low_data.field3 = x0;
-	                low_data.field4 = y0;
-	                low_data.field5 = x;
-	                low_data.field6 = y;
-	}
-	else (diff < -10){
-		low_data.field1 = 2;
-                low_data.field2 = -30;
-	        low_data.field3 = x0;
-	        low_data.field4 = y0;
-	        low_data.field5 = x;
-	        low_data.field6 = y;
-	}
-	
-	// check whether the plane reaches the radius range of a certain goal point, and if yes, then change the goal to the next point
-       	float x0 = position_N;
-	float y0 = -position_E;
-        distance = sqrt((x-x0)^2 + (y-y0)^2);;
-	
-	// when the plane reaches the desired range of a goal point
-        if (distance <= goalRadius) {
-		// check if the plane has visited all points, if yes, then break the loop
-		if (visited == cols){
-			break
-		}
-		// if the plane has not visited all points, then head to the next point 
-                else{
-                        visited += 1;
-                        x = input_points[visited][0];
-			y = input_points[visited][1];
-		}
-	}
-        */
-        
-        //check for visited checkpointts
-        
+        //hrt_absolute_time() - previous_loop_timestamp > 500000.0f) { // Run if more than 0.5 seconds have passes since last loop,
 
 }
