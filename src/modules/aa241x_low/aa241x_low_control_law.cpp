@@ -144,16 +144,16 @@ void low_loop()
         //assign goal point to low field that high control law can use
 	//if there is a new target point, otherwise continue to use the first line found
 	//this should avoid drift and keep us following the same straight line to a point
-        if (mincostind == -1) { //if no suitable goal is found idle
+        if (mincostind == -1) { //if no suitable goal is found idle, follow line directly right always
                 // low_data.field1 = goal_x[mincostind];
 //                 low_data.field2 = goal_y[mincostind];
-			low_data.field1 = 25;
-			low_data.field2 = 50;
+			low_data.field1 = x00 + 10.0f * cosf(angle - 3.1415f / 2.0f);
+			low_data.field2 = y00 + 10.0f * sinf(angle - 3.1415f / 2.0f);
 		//low_data.field3 = x00-(goal_x[mincostind]-x00);
 		//low_data.field4 = y00-(goal_y[mincostind]-y00);
-			low_data.field3 = -25;
-			low_data.field4 = 50;
-			low_data.field5 = 0;
+			low_data.field3 = x00 - 10.0f * cosf(angle - 3.1415f / 2.0f);
+			low_data.field4 = y00 - 10.0f * sinf(angle - 3.1415f / 2.0f);
+			low_data.field5 = -(angle - 3.1412f / 2.0f); //heading is 90 deg to right
 		//low_data.field5 = -minangle;
         }
 	else if ((abs(low_data.field1 - goal_x[mincostind]) > 1.0) || (abs(low_data.field2 - goal_y[mincostind]) > 1.0)) { //as long as new goal is different from old goal update
