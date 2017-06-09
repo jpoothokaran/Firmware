@@ -180,14 +180,30 @@ void flight_control() {
         
         psi_command = aah_parameters.gain_tracking*(d_command - d); // tracking gain (y in matlab)
 		//wrap to pi on heading going in in case commanded heading is -179 deg and measured is 179, difference is -358, which wraps to 2
-		yaw_temp = psi_command + yaw_desired - yaw; //if on line psi_command is 0, so want to match initial yaw
+		float psi_limit = aah_parameters.approach_angle * deg2rad;
+		        if (psi_command > psi_limit) {
+		                psi_command = psi_limit;
+		        }
+		        else if (psi_command < -psi_limit) {
+		                psi_command = -psi_limit;
+		        }
+		
+		yaw_temp = yaw_desired - yaw; //if on line psi_command is 0, so want to match initial yaw
 		if (yaw_temp > PI) {
 			yaw_temp = yaw_temp - 2.0f * PI;
 		}
 		else if (yaw_temp < -PI) {
 			yaw_temp = yaw_temp + 2.0f * PI;
 		}
-        phi_command = aah_parameters.gain_psi*(yaw_temp);
+        phi_command = aah_parameters.gain_psi*(psi_command + yaw_temp);
+        float phi_total = phi_command + aah_parameters.cmd_phi;
+        float bank_limit = deg2rad * aah_parameters.banklimit;
+        if (phi_total < -bank_limit) {
+            phi_total = -bank_limit;
+        }
+        else if (phi_total > bank_limit) {
+            phi_total = bank_limit;
+        }
 		//not wrapping on roll because never expect to get close to pi or -pi
         float delta_aileron = aah_parameters.gain_phi*(phi_command + aah_parameters.cmd_phi - roll); //Should be in rads
         float delta_rudder = aah_parameters.gain_beta*(beta_command - speed_body_v/speed_body_u); //Should be in rads, small angle approx of beta
@@ -570,6 +586,9 @@ void flight_control() {
     } else if (yaw_servo_out < -1.0f ) {
         yaw_servo_out = -1.0f;
     }
+    
+    
+}
     
     
 }
