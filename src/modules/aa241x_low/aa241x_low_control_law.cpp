@@ -101,18 +101,33 @@ int current_phase = 0;
 // condition for the loop to stop running is the plane has visited all points and the distance is within the desired radius range 
 void low_loop()
 {
-	/*
+	
 	//Getting this prepared for actual mission formulation
 	//
 	//only need to refresh goal x,y, and r if in a new mission mode
 	if (current_phase != phase_num) {
 		current_phase=phase_num;
-		goal_x = {plume_N[0],plume_N[1],plume_N[2],plume_N[3],plume_N[4]};
-		goal_y = {-plume_E[0],-plume_E[1],-plume_E[2],-plume_E[3],-plume_E[4]};
-		goal_r = {plume_radius[0],plume_radius[1],plume_radius[2],plume_radius[3],plume_radius[4]};
+		//goal_x = {plume_N[0],plume_N[1],plume_N[2],plume_N[3],plume_N[4]};
+		goal_x[0] = plume_N[0];
+		goal_x[1] = plume_N[1];
+		goal_x[2] = plume_N[2];
+		goal_x[3] = plume_N[3];
+		goal_x[4] = plume_N[4];
+		//goal_y = {-plume_E[0],-plume_E[1],-plume_E[2],-plume_E[3],-plume_E[4]};
+		goal_y[0] = -plume_E[0];
+		goal_y[1] = -plume_E[1];
+		goal_y[2] = -plume_E[2];
+		goal_y[3] = -plume_E[3];
+		goal_y[4] = -plume_E[4];
+		//goal_r = {plume_radius[0],plume_radius[1],plume_radius[2],plume_radius[3],plume_radius[4]};
+		goal_r[0] = plume_radius[0];
+		goal_r[1] = plume_radius[1];
+		goal_r[2] = plume_radius[2];
+		goal_r[3] = plume_radius[3];
+		goal_r[4] = plume_radius[4];
 	}
 	
-	*/
+	
 	//Get current state of aircraft
         float angle = -yaw;
 	float x00 = position_N;
